@@ -3,16 +3,17 @@ import MapView, { Marker } from "react-native-maps";
 import React, { useContext, useState } from "react";
 import { ActivityIndicator, Button, StyleSheet, View } from "react-native";
 
-import { LocationContext } from "../_layout";
+import { Accident } from "@/context/types";
 import { AuthContext } from "@/context/AuthContext";
+import { GeoLocationContext } from "@/context/GeoLocationContext";
 
 export default function TabTwoScreen() {
-  const { location, locationErrMsg } = useContext(LocationContext);
-  const [accidents, setAccidents] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
+  const { location, locationErrMsg } = useContext(GeoLocationContext);
   const authContext = useContext(AuthContext);
   const token = authContext?.token;
+
+  const [accidents, setAccidents] = useState<Accident[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const fetchAccidents = async () => {
     if (!token) return;
@@ -66,34 +67,33 @@ export default function TabTwoScreen() {
         <ActivityIndicator size="large" color="#25a9e2" />
       </View>
     );
-  } else {
-    console.log("location", location);
-    return (
-      <View style={styles.container}>
-        <View style={styles.buttonContainer}>
-          <Button title="" onPress={fetchAccidents} />
-        </View>
-        <MapView
-          style={styles.map}
-          initialRegion={initialRegion}
-          showsUserLocation={true}
-        >
-          {accidents.length > 0 &&
-            accidents.map((accident, index) => (
-              <Marker
-                key={index}
-                coordinate={{
-                  latitude: Number(accident.latitude),
-                  longitude: Number(accident.longitude),
-                }}
-                title={accident.title || "No title"}
-                description={accident.description || "No description"}
-              />
-            ))}
-        </MapView>
-      </View>
-    );
   }
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.buttonContainer}>
+        <Button title="" onPress={fetchAccidents} />
+      </View>
+      <MapView
+        style={styles.map}
+        initialRegion={initialRegion}
+        showsUserLocation={true}
+      >
+        {accidents.length > 0 &&
+          accidents.map((accident, index) => (
+            <Marker
+              key={index}
+              coordinate={{
+                latitude: Number(accident.latitude),
+                longitude: Number(accident.longitude),
+              }}
+              title={accident.title || "No title"}
+              description={accident.description || "No description"}
+            />
+          ))}
+      </MapView>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({

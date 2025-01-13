@@ -9,8 +9,8 @@ import {
 import { Button } from "react-native-elements";
 import { useState, useContext, useEffect } from "react";
 
-import { LocationContext } from "../_layout";
 import { AuthContext } from "@/context/AuthContext";
+import { GeoLocationContext } from "@/context/GeoLocationContext";
 
 export default function HomeScreen() {
   const authContext = useContext(AuthContext);
@@ -20,8 +20,7 @@ export default function HomeScreen() {
   const [isLoading, setIsLoading] = useState(true);
 
   const token = authContext?.token;
-  const { location, locationErrMsg, getCurrentLocation } =
-    useContext(LocationContext);
+  const { location, locationErrMsg } = useContext(GeoLocationContext);
 
   const pulse = () => {
     Animated.sequence([

@@ -1,6 +1,3 @@
-import { AuthContext, AuthContextValue } from "@/context/AuthContext";
-import React, { useContext, useEffect, useRef, useState } from "react";
-import { Button } from "react-native-elements";
 import {
   View,
   Text,
@@ -8,38 +5,30 @@ import {
   TextInput,
   StyleSheet,
   TouchableWithoutFeedback,
-  Platform,
 } from "react-native";
+import { Button } from "react-native-elements";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import React, { useContext, useEffect, useState } from "react";
 
-import * as Device from "expo-device";
-import * as Notifications from "expo-notifications";
-import Constants from "expo-constants";
-import { LocationContext } from "@/app/_layout";
-
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-  }),
-});
+import { GeoLocationContext } from "@/context/GeoLocationContext";
+import { AuthContext, AuthContextValue } from "@/context/AuthContext";
+import {
+  PushNotificationsContext,
+  PushNotificationsContextValue,
+} from "@/context/PushNotificationsContext";
 
 export default function Login() {
-  const [expoPushToken, setExpoPushToken] = useState("");
-  const [notification, setNotification] = useState<
-    Notifications.Notification | undefined
-  >(undefined);
-  const notificationListener = useRef<Notifications.EventSubscription>();
-  const responseListener = useRef<Notifications.EventSubscription>();
-  const { location } = useContext(LocationContext);
+  const { login } = React.useContext(AuthContext) as AuthContextValue;
+  const { location } = useContext(GeoLocationContext);
+  const { expoPushToken } = useContext(
+    PushNotificationsContext
+  ) as PushNotificationsContextValue;
 
   const [email, setEmail] = useState("");
-  const [error, setError] = useState<string | null>(null);
   const [password, setPassword] = useState("");
   const [repassword, setRepassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const [signUpActive, setSignUpActive] = useState(false);
-  const { login } = React.useContext(AuthContext) as AuthContextValue;
 
   useEffect(() => {
     AsyncStorage.getItem("token").then((token) => {
@@ -47,29 +36,6 @@ export default function Login() {
         login(token);
       }
     });
-
-    registerForPushNotificationsAsync()
-      .then((token) => setExpoPushToken(token ?? ""))
-      .catch((error: any) => setExpoPushToken(`${error}`));
-
-    notificationListener.current =
-      Notifications.addNotificationReceivedListener((notification) => {
-        setNotification(notification);
-      });
-
-    responseListener.current =
-      Notifications.addNotificationResponseReceivedListener((response) => {
-        console.log(response);
-      });
-
-    return () => {
-      notificationListener.current &&
-        Notifications.removeNotificationSubscription(
-          notificationListener.current
-        );
-      responseListener.current &&
-        Notifications.removeNotificationSubscription(responseListener.current);
-    };
   }, []);
 
   const handleSignUpActive = () => {
@@ -241,54 +207,3 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 });
-
-function handleRegistrationError(errorMessage: string) {
-  alert(errorMessage);
-  throw new Error(errorMessage);
-}
-
-async function registerForPushNotificationsAsync() {
-  if (Platform.OS === "android") {
-    Notifications.setNotificationChannelAsync("default", {
-      name: "default",
-      importance: Notifications.AndroidImportance.MAX,
-      vibrationPattern: [0, 250, 250, 250],
-      lightColor: "#FF231F7C",
-    });
-  }
-
-  if (Device.isDevice) {
-    const { status: existingStatus } =
-      await Notifications.getPermissionsAsync();
-    let finalStatus = existingStatus;
-    if (existingStatus !== "granted") {
-      const { status } = await Notifications.requestPermissionsAsync();
-      finalStatus = status;
-    }
-    if (finalStatus !== "granted") {
-      handleRegistrationError(
-        "Permission not granted to get push token for push notification!"
-      );
-      return;
-    }
-    const projectId =
-      Constants?.expoConfig?.extra?.eas?.projectId ??
-      Constants?.easConfig?.projectId;
-    if (!projectId) {
-      handleRegistrationError("Project ID not found");
-    }
-    try {
-      const pushTokenString = (
-        await Notifications.getExpoPushTokenAsync({
-          projectId,
-        })
-      ).data;
-      console.log(pushTokenString);
-      return pushTokenString;
-    } catch (e: unknown) {
-      handleRegistrationError(`${e}`);
-    }
-  } else {
-    handleRegistrationError("Must use physical device for push notifications");
-  }
-}

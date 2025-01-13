@@ -1,26 +1,29 @@
-import { Button } from "react-native-elements";
 import {
   View,
   Text,
   Keyboard,
   TextInput,
   StyleSheet,
-  TouchableWithoutFeedback,
   ActivityIndicator,
+  TouchableWithoutFeedback,
 } from "react-native";
 import { Checkbox } from "expo-checkbox";
+import { Button } from "react-native-elements";
 import React, { useContext, useEffect, useState } from "react";
 
+import { User } from "@/context/types";
 import { AuthContext, AuthContextValue } from "@/context/AuthContext";
+import { validatePhone } from "@/utils/utils";
 
 export default function TabThreeScreen() {
-  const [user, setUser] = useState<any>({});
-  const [isLoading, setIsLoading] = useState(true);
-  const [isEditMode, setIsEditMode] = useState(false);
   const { logout } = React.useContext(AuthContext) as AuthContextValue;
-
   const authContext = useContext(AuthContext);
   const token = authContext?.token;
+
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [phoneInputError, setPhoneInputError] = useState<string | null>(null);
+  const [isEditMode, setIsEditMode] = useState(false);
 
   useEffect(() => {
     fetchUser();
@@ -57,7 +60,7 @@ export default function TabThreeScreen() {
   };
 
   const handleSave = async () => {
-    if (!token) return;
+    if (!token || !user) return;
 
     try {
       setIsLoading(true);
@@ -90,7 +93,7 @@ export default function TabThreeScreen() {
     }
   };
 
-  if (isLoading) {
+  if (isLoading || !user) {
     return (
       <View style={styles.container}>
         <ActivityIndicator size="large" color="#25a9e2" />
@@ -108,6 +111,7 @@ export default function TabThreeScreen() {
           style={isEditMode ? styles.inputEnabled : styles.inputDisabled}
           value={user.name}
           editable={isEditMode}
+          maxLength={50}
           onChangeText={(text) => setUser({ ...user, name: text })}
           placeholder="Иван Иванов"
           placeholderTextColor={"#ccc"}
@@ -138,17 +142,30 @@ export default function TabThreeScreen() {
           style={isEditMode ? styles.inputEnabled : styles.inputDisabled}
           value={user.phone}
           editable={isEditMode}
-          onChangeText={(phone) => setUser({ ...user, phone: phone })}
+          maxLength={11}
+          onChangeText={(phone) => {
+            setUser({ ...user, phone: phone });
+
+            if (validatePhone(phone)) {
+              setPhoneInputError(null);
+            } else {
+              setPhoneInputError("Номер должен содержать 11 цифр");
+            }
+          }}
           placeholder="89191234567"
           placeholderTextColor={"#ccc"}
           keyboardType="phone-pad"
         />
+        {phoneInputError && (
+          <Text style={styles.inputError}>{phoneInputError}</Text>
+        )}
 
         <Text style={styles.label}>Марка и модель мотоцикла</Text>
         <TextInput
           style={isEditMode ? styles.inputEnabled : styles.inputDisabled}
           value={user.bikeModel}
           editable={isEditMode}
+          maxLength={50}
           onChangeText={(bikeModel) =>
             setUser({ ...user, bikeModel: bikeModel })
           }
@@ -238,5 +255,10 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 20,
     fontWeight: "bold",
+  },
+  inputError: {
+    color: "red",
+    fontSize: 12,
+    marginBottom: 10,
   },
 });
