@@ -44,7 +44,7 @@ export default function Login() {
   };
 
   const handleLogin = () => {
-    const url = "http://moto-alert.ru/auth/login";
+    const url = "https://moto-alert.ru/auth/login";
     const body = {
       email: email.trim(),
       password,
@@ -75,7 +75,7 @@ export default function Login() {
   };
 
   const handleCreate = () => {
-    const url = "http://moto-alert.ru/auth/create";
+    const url = "https://moto-alert.ru/auth/create";
     console.log("handleCreate");
     if (password !== repassword) {
       setError("Passwords do not match");
@@ -168,6 +168,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 20,
     marginBottom: 80,
+    backgroundColor: "#fff",
   },
   input: {
     width: "100%",

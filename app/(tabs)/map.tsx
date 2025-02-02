@@ -26,7 +26,7 @@ export default function TabTwoScreen() {
 
     setIsLoading(true);
     try {
-      const response = await fetch(`http://moto-alert.ru/accidents/`, {
+      const response = await fetch(`https://moto-alert.ru/accidents/`, {
         headers: {
           Authorization: token,
         },
@@ -48,7 +48,7 @@ export default function TabTwoScreen() {
       try {
         setIsLoading(true);
         const response = await fetch(
-          "http://moto-alert.ru/accidents/help/" + accidentId,
+          "https://moto-alert.ru/accidents/help/" + accidentId,
           {
             method: "POST",
             headers: {

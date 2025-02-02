@@ -49,7 +49,7 @@ export default function HomeScreen() {
     setIsLoading(true);
     try {
       const response = await fetch(
-        `http://moto-alert.ru/accidents/current`,
+        `https://moto-alert.ru/accidents/current`,
         {
           headers: {
             Authorization: token,
@@ -73,7 +73,7 @@ export default function HomeScreen() {
       try {
         setIsLoading(true);
         const response = await fetch(
-          "http://moto-alert.ru/accidents/create",
+          "https://moto-alert.ru/accidents/create",
           {
             method: "POST",
             headers: {
@@ -105,7 +105,7 @@ export default function HomeScreen() {
     try {
       setIsLoading(true);
       const response = await fetch(
-        "http://moto-alert.ru/accidents/cancel",
+        "https://moto-alert.ru/accidents/cancel",
         {
           method: "POST",
           headers: {

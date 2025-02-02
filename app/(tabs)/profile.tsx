@@ -37,7 +37,7 @@ export default function TabThreeScreen() {
     if (!token) return;
     try {
       setIsLoading(true);
-      const response = await fetch("http://moto-alert.ru/user/", {
+      const response = await fetch("https://moto-alert.ru/user/", {
         method: "GET",
         headers: {
           Authorization: token,
@@ -64,27 +64,27 @@ export default function TabThreeScreen() {
   };
 
   const handleSave = async () => {
+    if (!user || (!user.name && !user.phone && !user.bikeModel && !user.gender))
+      return;
     if (nameInputError || phoneInputError || bikeModelInputError) return;
     if (!token || !user) return;
 
+    const body: Partial<User> = {};
+    if (user.name) body.name = user.name;
+    if (user.phone) body.phone = user.phone;
+    if (user.bikeModel) body.bikeModel = user.bikeModel;
+    if (user.gender) body.gender = user.gender;
+
     try {
       setIsLoading(true);
-      const response = await fetch(
-        "http://moto-alert.ru/user/update",
-        {
-          method: "POST",
-          headers: {
-            Authorization: token,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            name: user.name,
-            phone: user.phone,
-            bikeModel: user.bikeModel,
-            gender: user.gender,
-          }),
-        }
-      );
+      const response = await fetch("https://moto-alert.ru/user/update", {
+        method: "POST",
+        headers: {
+          Authorization: token,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      });
 
       const data = await response.json();
       if (data.error) throw new Error(JSON.stringify(data));
