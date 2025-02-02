@@ -1,17 +1,23 @@
 import { useFocusEffect } from "expo-router";
-import MapView, { Marker } from "react-native-maps";
+import { Button } from "react-native-elements";
 import React, { useContext, useState } from "react";
-import { ActivityIndicator, Button, StyleSheet, View } from "react-native";
+import MapView, { Callout, Marker } from "react-native-maps";
+import { Text, View, StyleSheet, ActivityIndicator, Modal } from "react-native";
 
 import { Accident } from "@/context/types";
 import { AuthContext } from "@/context/AuthContext";
 import { GeoLocationContext } from "@/context/GeoLocationContext";
+import { handleUrlParams } from "expo-router/build/fork/getStateFromPath-forks";
 
 export default function TabTwoScreen() {
+  const [modalVisible, setModalVisible] = useState(false);
   const { location, locationErrMsg } = useContext(GeoLocationContext);
   const authContext = useContext(AuthContext);
   const token = authContext?.token;
 
+  const [selectedAccident, setSelectedAccident] = useState<Accident | null>(
+    null
+  );
   const [accidents, setAccidents] = useState<Accident[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -37,6 +43,32 @@ export default function TabTwoScreen() {
       console.log("Error", error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleHelpInAccident = async (accidentId: number | undefined) => {
+    if (location && token && accidentId) {
+      try {
+        setIsLoading(true);
+        const response = await fetch(
+          process.env.EXPO_PUBLIC_API_URL + "/accidents/help/" + accidentId,
+          {
+            method: "POST",
+            headers: {
+              Authorization: token,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        const data = await response.json();
+        if (data.error) throw new Error(JSON.stringify(data));
+        console.log("Helped in accident", data);
+      } catch (error) {
+        console.log("Error:", error);
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -69,11 +101,10 @@ export default function TabTwoScreen() {
     );
   }
 
+  console.log("selectedAccident", selectedAccident);
+
   return (
     <View style={styles.container}>
-      <View style={styles.buttonContainer}>
-        <Button title="" onPress={fetchAccidents} />
-      </View>
       <MapView
         style={styles.map}
         initialRegion={initialRegion}
@@ -89,9 +120,55 @@ export default function TabTwoScreen() {
               }}
               title={accident.title || "No title"}
               description={accident.description || "No description"}
-            />
+            >
+              <Callout
+                onPress={() => {
+                  setSelectedAccident(accident);
+                  setModalVisible(true);
+                }}
+              >
+                <View>
+                  <Text style={styles.calloutTitle}>{accident.title}</Text>
+                  <Text style={styles.calloutDescription}>
+                    {accident.description}
+                  </Text>
+                  <Button
+                    buttonStyle={styles.calloutButton}
+                    titleStyle={styles.calloutButtonTitle}
+                    title="Подробнее"
+                  />
+                </View>
+              </Callout>
+            </Marker>
           ))}
       </MapView>
+      <Modal
+        visible={modalVisible}
+        transparent={true}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text>ID: {selectedAccident?.id}</Text>
+            <Text>USER ID: {selectedAccident?.userId}</Text>
+            <Text>TITLE: {selectedAccident?.title}</Text>
+            <Text>DESCRIPTION: {selectedAccident?.description}</Text>
+            <Text>CREATED AT: {selectedAccident?.createdAt}</Text>
+            <Text>PUSH RECIPIENTS: {selectedAccident?.pushRecipients}</Text>
+            <Text>{}</Text>
+            <Button
+              title="Отозваться на помощь"
+              onPress={() => handleHelpInAccident(selectedAccident?.id)}
+            />
+            <Button
+              title="Закрыть"
+              onPress={() => {
+                setModalVisible(false);
+              }}
+            />
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -107,14 +184,20 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
   },
-  buttonContainer: {
-    position: "absolute",
-    bottom: 120,
-    left: 0,
-    right: 0,
-    zIndex: 1,
-    // backgroundColor: "white",
+  calloutTitle: {},
+  calloutDescription: {},
+  calloutButton: {},
+  calloutButtonTitle: {},
+  modalContainer: {
+    flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    backgroundColor: "#fff",
+    padding: 20,
+    borderRadius: 10,
+    width: "80%",
   },
 });

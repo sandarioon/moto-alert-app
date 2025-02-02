@@ -1,4 +1,4 @@
 export const validatePhone = (phone: string) => {
-  const regex = /^\d{11}$/;
+  const regex = /^\+?8\d{10}$|^\+?7\d{10}$|^\d{11}$/;
   return regex.test(phone);
 };

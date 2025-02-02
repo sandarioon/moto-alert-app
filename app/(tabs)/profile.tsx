@@ -12,8 +12,8 @@ import { Button } from "react-native-elements";
 import React, { useContext, useEffect, useState } from "react";
 
 import { User } from "@/context/types";
-import { AuthContext, AuthContextValue } from "@/context/AuthContext";
 import { validatePhone } from "@/utils/utils";
+import { AuthContext, AuthContextValue } from "@/context/AuthContext";
 
 export default function TabThreeScreen() {
   const { logout } = React.useContext(AuthContext) as AuthContextValue;
@@ -22,7 +22,11 @@ export default function TabThreeScreen() {
 
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [nameInputError, setNameInputError] = useState<string | null>(null);
   const [phoneInputError, setPhoneInputError] = useState<string | null>(null);
+  const [bikeModelInputError, setBikeModelInputError] = useState<string | null>(
+    null
+  );
   const [isEditMode, setIsEditMode] = useState(false);
 
   useEffect(() => {
@@ -34,7 +38,7 @@ export default function TabThreeScreen() {
     try {
       setIsLoading(true);
       const response = await fetch(
-        process.env.EXPO_PUBLIC_API_URL + "/users/",
+        process.env.EXPO_PUBLIC_API_URL + "/user/",
         {
           method: "GET",
           headers: {
@@ -56,16 +60,20 @@ export default function TabThreeScreen() {
   };
 
   const handleEditMode = () => {
+    setNameInputError(null);
+    setPhoneInputError(null);
+    setBikeModelInputError(null);
     setIsEditMode(!isEditMode);
   };
 
   const handleSave = async () => {
+    if (nameInputError || phoneInputError || bikeModelInputError) return;
     if (!token || !user) return;
 
     try {
       setIsLoading(true);
       const response = await fetch(
-        process.env.EXPO_PUBLIC_API_URL + "/users/update",
+        process.env.EXPO_PUBLIC_API_URL + "/user/update",
         {
           method: "POST",
           headers: {
@@ -112,10 +120,20 @@ export default function TabThreeScreen() {
           value={user.name}
           editable={isEditMode}
           maxLength={50}
-          onChangeText={(text) => setUser({ ...user, name: text })}
+          onChangeText={(text) => {
+            setUser({ ...user, name: text });
+            if (text.length < 2) {
+              setNameInputError("Имя должно содержать не менее двух символов");
+            } else {
+              setNameInputError(null);
+            }
+          }}
           placeholder="Иван Иванов"
           placeholderTextColor={"#ccc"}
         />
+        {nameInputError && (
+          <Text style={styles.inputError}>{nameInputError}</Text>
+        )}
 
         <Text style={styles.label}>Пол</Text>
         <View style={styles.checkbox}>
@@ -149,10 +167,10 @@ export default function TabThreeScreen() {
             if (validatePhone(phone)) {
               setPhoneInputError(null);
             } else {
-              setPhoneInputError("Номер должен содержать 11 цифр");
+              setPhoneInputError("Укажите номер телефона");
             }
           }}
-          placeholder="89191234567"
+          placeholder="8XXXXXXXXXX"
           placeholderTextColor={"#ccc"}
           keyboardType="phone-pad"
         />
@@ -166,20 +184,47 @@ export default function TabThreeScreen() {
           value={user.bikeModel}
           editable={isEditMode}
           maxLength={50}
-          onChangeText={(bikeModel) =>
-            setUser({ ...user, bikeModel: bikeModel })
-          }
+          onChangeText={(bikeModel) => {
+            setUser({ ...user, bikeModel: bikeModel });
+            if (bikeModel.length < 3) {
+              setBikeModelInputError("Не менее трех символов");
+            } else {
+              setBikeModelInputError(null);
+            }
+          }}
           placeholder="Yamaha R1"
           placeholderTextColor={"#ccc"}
         />
+        {bikeModelInputError && (
+          <Text style={styles.inputError}>{bikeModelInputError}</Text>
+        )}
+        {isEditMode ? (
+          <View style={{ flex: 1 }}>
+            <Button
+              buttonStyle={styles.saveButton}
+              titleStyle={styles.buttonTitle}
+              title={"Сохранить"}
+              onPress={handleSave}
+            />
+            <Button
+              buttonStyle={styles.cancelButton}
+              titleStyle={styles.buttonTitle}
+              title="Отменить"
+              onPress={handleEditMode}
+            />
+          </View>
+        ) : (
+          <View style={{ flex: 1 }}>
+            <Button
+              buttonStyle={styles.editButton}
+              titleStyle={styles.buttonTitle}
+              title={"Редактировать"}
+              onPress={handleEditMode}
+            />
+          </View>
+        )}
         <Button
-          buttonStyle={styles.button}
-          titleStyle={styles.buttonTitle}
-          title={isEditMode ? "Сохранить" : "Редактировать"}
-          onPress={isEditMode ? handleSave : handleEditMode}
-        />
-        <Button
-          buttonStyle={styles.button}
+          buttonStyle={styles.exitButton}
           titleStyle={styles.buttonTitle}
           title={"Выйти"}
           onPress={logout}
@@ -201,6 +246,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     textAlign: "center",
+    marginTop: 50,
     marginBottom: 20,
   },
   label: {
@@ -244,9 +290,28 @@ const styles = StyleSheet.create({
   checkBoxText: {
     marginLeft: 10,
   },
-  button: {
+  editButton: {
     width: "100%",
     backgroundColor: "#25a9e2",
+    borderRadius: 10,
+    padding: 10,
+    marginTop: 15,
+  },
+  cancelButton: {
+    backgroundColor: "#808080",
+    borderRadius: 10,
+    padding: 10,
+    marginTop: 15,
+  },
+  saveButton: {
+    backgroundColor: "#25a9e2",
+    borderRadius: 10,
+    padding: 10,
+    marginTop: 15,
+  },
+  exitButton: {
+    width: "100%",
+    backgroundColor: "#FF0033",
     borderRadius: 10,
     padding: 10,
     marginTop: 15,

@@ -1,7 +1,7 @@
 export interface User {
   id: number;
   bikeModel: string;
-  createdAt: Date;
+  createdAt: string;
   email: string;
   expoPushToken: string;
   gender: "male" | "female";
@@ -20,8 +20,8 @@ export interface Accident {
   longitude: number;
   pushRecipients: number;
   state: AccidentState;
-  updatedAt: Date;
-  createdAt: Date;
+  updatedAt: string;
+  createdAt: string;
 }
 
 export enum AccidentState {
