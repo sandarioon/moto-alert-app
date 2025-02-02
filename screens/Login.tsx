@@ -44,7 +44,7 @@ export default function Login() {
   };
 
   const handleLogin = () => {
-    const url = process.env.EXPO_PUBLIC_API_URL + "/auth/login";
+    const url = "http://moto-alert.ru/auth/login";
     const body = {
       email: email.trim(),
       password,
@@ -75,7 +75,7 @@ export default function Login() {
   };
 
   const handleCreate = () => {
-    const url = process.env.EXPO_PUBLIC_API_URL + "/auth/create";
+    const url = "http://moto-alert.ru/auth/create";
     console.log("handleCreate");
     if (password !== repassword) {
       setError("Passwords do not match");

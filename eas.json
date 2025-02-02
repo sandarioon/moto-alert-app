@@ -12,10 +12,17 @@
       "distribution": "internal"
     },
     "production": {
-      "autoIncrement": true
+      "autoIncrement": true,
+      "environment": "production"
     }
   },
   "submit": {
-    "production": {}
+    "production": {
+      "ios": {
+        "appleId": "vlasjuk.andrey@mail.ru",
+        "ascAppId": "6741380022",
+        "appleTeamId": "Y4QLJZNMZ4"
+      }
+    }
   }
 }

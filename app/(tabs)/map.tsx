@@ -26,14 +26,11 @@ export default function TabTwoScreen() {
 
     setIsLoading(true);
     try {
-      const response = await fetch(
-        `${process.env.EXPO_PUBLIC_API_URL}/accidents/`,
-        {
-          headers: {
-            Authorization: token,
-          },
-        }
-      );
+      const response = await fetch(`http://moto-alert.ru/accidents/`, {
+        headers: {
+          Authorization: token,
+        },
+      });
       const data = await response.json();
       if (data.error) throw new Error(JSON.stringify(data));
       console.log("Fetched accidents", data);
@@ -51,7 +48,7 @@ export default function TabTwoScreen() {
       try {
         setIsLoading(true);
         const response = await fetch(
-          process.env.EXPO_PUBLIC_API_URL + "/accidents/help/" + accidentId,
+          "http://moto-alert.ru/accidents/help/" + accidentId,
           {
             method: "POST",
             headers: {

@@ -25,6 +25,8 @@
       },
       "permissions": [
         "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
         "android.permission.ACCESS_FINE_LOCATION"
       ],
       "package": "com.sandarion.motoalert"
@@ -63,6 +65,12 @@
         "projectId": "d31105fc-30f5-4fa0-b94f-932d433df717"
       }
     },
-    "owner": "sandarion"
+    "owner": "sandarion",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/d31105fc-30f5-4fa0-b94f-932d433df717"
+    }
   }
 }

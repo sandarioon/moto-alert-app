@@ -37,15 +37,12 @@ export default function TabThreeScreen() {
     if (!token) return;
     try {
       setIsLoading(true);
-      const response = await fetch(
-        process.env.EXPO_PUBLIC_API_URL + "/user/",
-        {
-          method: "GET",
-          headers: {
-            Authorization: token,
-          },
-        }
-      );
+      const response = await fetch("http://moto-alert.ru/user/", {
+        method: "GET",
+        headers: {
+          Authorization: token,
+        },
+      });
 
       const data = await response.json();
       if (data.error) throw new Error(JSON.stringify(data));
@@ -73,7 +70,7 @@ export default function TabThreeScreen() {
     try {
       setIsLoading(true);
       const response = await fetch(
-        process.env.EXPO_PUBLIC_API_URL + "/user/update",
+        "http://moto-alert.ru/user/update",
         {
           method: "POST",
           headers: {
