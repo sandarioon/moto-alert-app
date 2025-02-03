@@ -5,6 +5,7 @@
   "scripts": {
     "build": "eas build",
     "build:ios": "eas build --profile production --platform ios",
+    "submit:ios": "eas submit -p ios --latest",
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
     "android": "expo start --android",
