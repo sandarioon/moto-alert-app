@@ -15,6 +15,9 @@
       }
     },
     "ios": {
+      "config": {
+        "usesNonExemptEncryption": false
+      },
       "supportsTablet": true,
       "bundleIdentifier": "com.sandarion.motoalert"
     },
