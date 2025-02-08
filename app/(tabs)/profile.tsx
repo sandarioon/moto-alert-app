@@ -9,10 +9,11 @@ import {
 } from "react-native";
 import { Checkbox } from "expo-checkbox";
 import { Button } from "react-native-elements";
+import { showMessage } from "react-native-flash-message";
 import React, { useContext, useEffect, useState } from "react";
 
-import { User } from "@/context/types";
 import { validatePhone } from "@/utils/utils";
+import { User, UserGender } from "@/context/types";
 import { AuthContext, AuthContextValue } from "@/context/AuthContext";
 
 export default function TabThreeScreen() {
@@ -51,6 +52,11 @@ export default function TabThreeScreen() {
       setUser(data);
     } catch (error) {
       console.log("Error:", error);
+      showMessage({
+        duration: 3000,
+        message: "Не удалось загрузить данные о пользователе",
+        type: "danger",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -93,6 +99,11 @@ export default function TabThreeScreen() {
       setIsEditMode(false);
     } catch (error) {
       console.error("Error updating user data:", error);
+      showMessage({
+        duration: 3000,
+        message: "Не удалось сохранить данные о пользователе",
+        type: "danger",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -138,7 +149,9 @@ export default function TabThreeScreen() {
             <Checkbox
               disabled={!isEditMode}
               value={user.gender === "male"}
-              onValueChange={() => setUser({ ...user, gender: "male" })}
+              onValueChange={() =>
+                setUser({ ...user, gender: UserGender.MALE })
+              }
             />
             <Text style={styles.checkBoxText}>Мужской</Text>
           </View>
@@ -146,7 +159,9 @@ export default function TabThreeScreen() {
             <Checkbox
               disabled={!isEditMode}
               value={user.gender === "female"}
-              onValueChange={() => setUser({ ...user, gender: "female" })}
+              onValueChange={() =>
+                setUser({ ...user, gender: UserGender.FEMALE })
+              }
             />
             <Text style={styles.checkBoxText}>Женский</Text>
           </View>
@@ -183,7 +198,7 @@ export default function TabThreeScreen() {
           maxLength={50}
           onChangeText={(bikeModel) => {
             setUser({ ...user, bikeModel: bikeModel });
-            if (bikeModel.length < 3) {
+            if (bikeModel.length < 4) {
               setBikeModelInputError("Не менее трех символов");
             } else {
               setBikeModelInputError(null);

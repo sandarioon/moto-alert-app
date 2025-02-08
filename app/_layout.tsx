@@ -9,6 +9,7 @@ import { useFonts } from "expo-font";
 import React, { useEffect } from "react";
 import { StatusBar } from "expo-status-bar";
 import * as SplashScreen from "expo-splash-screen";
+import FlashMessage from "react-native-flash-message";
 
 import Login from "@/screens/Login";
 import { useColorScheme } from "@/hooks/useColorScheme";
@@ -67,6 +68,7 @@ export default function RootLayout() {
         </ThemeProvider>
         <StatusBar style="auto" />
       </AuthProvider>
+      <FlashMessage position="top" />
     </PushNotificationsProvider>
   );
 }

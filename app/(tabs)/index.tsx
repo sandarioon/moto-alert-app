@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from "react-native";
+import { Linking } from "react-native";
 import { Button } from "react-native-elements";
 import { useState, useContext, useEffect } from "react";
 
@@ -48,14 +49,11 @@ export default function HomeScreen() {
 
     setIsLoading(true);
     try {
-      const response = await fetch(
-        `https://moto-alert.ru/accidents/current`,
-        {
-          headers: {
-            Authorization: token,
-          },
-        }
-      );
+      const response = await fetch(`https://moto-alert.ru/accidents/current`, {
+        headers: {
+          Authorization: token,
+        },
+      });
       const data = await response.json();
       if (data.error) throw new Error(JSON.stringify(data));
       console.log("Fetched current accident", data);
@@ -72,20 +70,17 @@ export default function HomeScreen() {
     if (location && token) {
       try {
         setIsLoading(true);
-        const response = await fetch(
-          "https://moto-alert.ru/accidents/create",
-          {
-            method: "POST",
-            headers: {
-              Authorization: token,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              longitude: location.coords.longitude,
-              latitude: location.coords.latitude,
-            }),
-          }
-        );
+        const response = await fetch("https://moto-alert.ru/accidents/create", {
+          method: "POST",
+          headers: {
+            Authorization: token,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            longitude: location.coords.longitude,
+            latitude: location.coords.latitude,
+          }),
+        });
 
         const data = await response.json();
         if (data.error) throw new Error(JSON.stringify(data));
@@ -104,15 +99,12 @@ export default function HomeScreen() {
     if (!token) return;
     try {
       setIsLoading(true);
-      const response = await fetch(
-        "https://moto-alert.ru/accidents/cancel",
-        {
-          method: "POST",
-          headers: {
-            Authorization: token,
-          },
-        }
-      );
+      const response = await fetch("https://moto-alert.ru/accidents/cancel", {
+        method: "POST",
+        headers: {
+          Authorization: token,
+        },
+      });
 
       const data = await response.json();
       if (data.error) throw new Error(JSON.stringify(data));
@@ -166,6 +158,14 @@ export default function HomeScreen() {
           onPress={handleCreateAccident}
         />
       )}
+      <View>
+        <Button
+          buttonStyle={styles.emergencyCallButton}
+          titleStyle={styles.emergencyCallButtonTitle}
+          title="Позвонить 112"
+          onPress={() => Linking.openURL("tel:112")}
+        />
+      </View>
       {accident && (
         <Text style={styles.accidentInfo}>
           Вы сообщили об аварии. Push-уведомления были отправлены всем в радиусе
@@ -225,6 +225,17 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "white",
     fontSize: 24,
+  },
+  emergencyCallButton: {
+    marginTop: 50,
+    backgroundColor: "#25a9e2",
+    borderRadius: 10,
+  },
+  emergencyCallButtonTitle: {
+    fontWeight: "bold",
+    color: "white",
+    fontSize: 24,
+    padding: 10,
   },
   accidentInfo: {
     color: "black",

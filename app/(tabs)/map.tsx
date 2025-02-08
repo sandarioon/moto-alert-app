@@ -1,13 +1,20 @@
+import {
+  Text,
+  View,
+  Modal,
+  Linking,
+  StyleSheet,
+  ActivityIndicator,
+} from "react-native";
 import { useFocusEffect } from "expo-router";
 import { Button } from "react-native-elements";
 import React, { useContext, useState } from "react";
+import { showMessage } from "react-native-flash-message";
 import MapView, { Callout, Marker } from "react-native-maps";
-import { Text, View, StyleSheet, ActivityIndicator, Modal } from "react-native";
 
 import { Accident } from "@/context/types";
 import { AuthContext } from "@/context/AuthContext";
 import { GeoLocationContext } from "@/context/GeoLocationContext";
-import { handleUrlParams } from "expo-router/build/fork/getStateFromPath-forks";
 
 export default function TabTwoScreen() {
   const [modalVisible, setModalVisible] = useState(false);
@@ -15,10 +22,10 @@ export default function TabTwoScreen() {
   const authContext = useContext(AuthContext);
   const token = authContext?.token;
 
+  const [accidents, setAccidents] = useState<Accident[]>([]);
   const [selectedAccident, setSelectedAccident] = useState<Accident | null>(
     null
   );
-  const [accidents, setAccidents] = useState<Accident[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchAccidents = async () => {
@@ -63,6 +70,11 @@ export default function TabTwoScreen() {
         console.log("Helped in accident", data);
       } catch (error) {
         console.log("Error:", error);
+        showMessage({
+          duration: 3000,
+          message: "Вы не можете отозваться на собственный запрос о помощи",
+          type: "danger",
+        });
       } finally {
         setIsLoading(false);
       }
@@ -125,8 +137,8 @@ export default function TabTwoScreen() {
                 }}
               >
                 <View>
-                  <Text style={styles.calloutTitle}>{accident.title}</Text>
-                  <Text style={styles.calloutDescription}>
+                  <Text style={styles.calloutTextTitle}>{accident.title}</Text>
+                  <Text style={styles.calloutTextDescription}>
                     {accident.description}
                   </Text>
                   <Button
@@ -146,18 +158,63 @@ export default function TabTwoScreen() {
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <Text>ID: {selectedAccident?.id}</Text>
-            <Text>USER ID: {selectedAccident?.userId}</Text>
-            <Text>TITLE: {selectedAccident?.title}</Text>
-            <Text>DESCRIPTION: {selectedAccident?.description}</Text>
-            <Text>CREATED AT: {selectedAccident?.createdAt}</Text>
-            <Text>PUSH RECIPIENTS: {selectedAccident?.pushRecipients}</Text>
-            <Text>{}</Text>
+            <View style={styles.textContainer}>
+              <Text style={styles.modalTextTitle}>ID: </Text>
+              <Text style={styles.modalTextDescription}>
+                {selectedAccident?.id}
+              </Text>
+            </View>
+
+            <View style={styles.textContainer}>
+              <Text style={styles.modalTextTitle}>Имя: </Text>
+              <Text style={styles.modalTextDescription}>
+                {selectedAccident?.name}
+              </Text>
+            </View>
+
+            {selectedAccident?.phone ? (
+              <View style={styles.textContainer}>
+                <Text style={styles.modalTextTitle}>Телефон: </Text>
+                <Text
+                  style={styles.calloutPhone}
+                  onPress={() =>
+                    Linking.openURL(`tel:${selectedAccident?.phone}`)
+                  }
+                >
+                  {selectedAccident.phone}
+                </Text>
+              </View>
+            ) : (
+              <View style={styles.textContainer}>
+                <Text style={styles.modalTextTitle}>Телефон: </Text>
+                <Text style={styles.modalTextDescription}>Не указан</Text>
+              </View>
+            )}
+
+            <View style={styles.textContainer}>
+              <Text style={styles.modalTextTitle}>Пол: </Text>
+              <Text style={styles.modalTextDescription}>
+                {selectedAccident?.gender === "male" ? "Мужской" : "Женский"}
+              </Text>
+            </View>
+
+            <View style={styles.textContainer}>
+              <Text style={styles.modalTextTitle}>Мотоцикл: </Text>
+              <Text style={styles.modalTextDescription}>
+                {selectedAccident?.bikeModel || "Не указан"}
+              </Text>
+            </View>
+
             <Button
+              buttonStyle={styles.modalHelpButton}
+              titleStyle={styles.modalHelpButtonTitle}
               title="Отозваться на помощь"
               onPress={() => handleHelpInAccident(selectedAccident?.id)}
             />
+
             <Button
+              buttonStyle={styles.modalCloseButton}
+              titleStyle={styles.modalCloseButtonTitle}
               title="Закрыть"
               onPress={() => {
                 setModalVisible(false);
@@ -171,6 +228,10 @@ export default function TabTwoScreen() {
 }
 
 const styles = StyleSheet.create({
+  textContainer: {
+    flexDirection: "row",
+    marginVertical: 5,
+  },
   container: {
     flex: 1,
     backgroundColor: "#fff",
@@ -181,12 +242,42 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
   },
-  calloutTitle: {},
-  calloutDescription: {},
-  calloutButton: {},
+  calloutTextTitle: {
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+  calloutTextDescription: {
+    marginTop: 5,
+    fontSize: 16,
+  },
+  modalTextTitle: {
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+  modalTextDescription: {
+    fontSize: 16,
+  },
+  calloutPhone: {
+    color: "blue",
+    fontSize: 16,
+  },
+  calloutButton: {
+    marginTop: 20,
+  },
   calloutButtonTitle: {},
+  modalHelpButton: {
+    marginTop: 20,
+    borderRadius: 10,
+  },
+  modalHelpButtonTitle: {},
+  modalCloseButton: {
+    marginTop: 10,
+    borderRadius: 10,
+  },
+  modalCloseButtonTitle: {},
   modalContainer: {
     flex: 1,
+
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "rgba(0, 0, 0, 0.5)",

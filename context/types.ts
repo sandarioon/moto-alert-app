@@ -1,10 +1,15 @@
+export enum UserGender {
+  MALE = "male",
+  FEMALE = "female",
+}
+
 export interface User {
   id: number;
   bikeModel: string;
   createdAt: string;
   email: string;
   expoPushToken: string;
-  gender: "male" | "female";
+  gender: UserGender;
   latitude: number;
   longitude: number;
   name: string;
@@ -14,6 +19,10 @@ export interface User {
 export interface Accident {
   id: number;
   userId: number;
+  name: string | null;
+  phone: string | null;
+  bikeModel: string | null;
+  gender: UserGender;
   title: string | null;
   description: string | null;
   latitude: number;
