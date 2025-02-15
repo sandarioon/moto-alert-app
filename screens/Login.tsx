@@ -1,21 +1,21 @@
 import {
   View,
-  Text,
   Keyboard,
-  TextInput,
   StyleSheet,
   TouchableWithoutFeedback,
 } from "react-native";
-import { Button } from "react-native-elements";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useContext, useEffect, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import { GeoLocationContext } from "@/context/GeoLocationContext";
-import { AuthContext, AuthContextValue } from "@/context/AuthContext";
 import {
   PushNotificationsContext,
   PushNotificationsContextValue,
 } from "@/context/PushNotificationsContext";
+import { ThemedText } from "@/components/ThemedText";
+import { ThemedButton } from "@/components/ThemedButton";
+import { ThemedTextInput } from "@/components/ThemedTextInput";
+import { GeoLocationContext } from "@/context/GeoLocationContext";
+import { AuthContext, AuthContextValue } from "@/context/AuthContext";
 
 export default function Login() {
   const { login } = React.useContext(AuthContext) as AuthContextValue;
@@ -113,49 +113,53 @@ export default function Login() {
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
       <View style={styles.container}>
-        <TextInput
-          style={styles.input}
-          placeholder="Email@gmail.com"
-          placeholderTextColor="#787878"
-          value={email}
-          onChangeText={(text) => setEmail(text)}
-        />
-
-        <TextInput
-          style={styles.input}
-          placeholder="Пароль"
-          placeholderTextColor="#787878"
-          secureTextEntry={true}
-          value={password}
-          onChangeText={(text) => setPassword(text)}
-        />
-        {signUpActive && (
-          <TextInput
-            style={styles.input}
-            placeholder="Повторите пароль"
-            placeholderTextColor="#787878"
-            secureTextEntry={true}
-            value={repassword}
-            onChangeText={(text) => setRepassword(text)}
+        <View style={styles.formContainer}>
+          <ThemedTextInput
+            type="active"
+            value={email}
+            editable={true}
+            maxLength={50}
+            onChangeText={(text) => setEmail(text)}
+            placeholder="Email@gmail.com"
           />
-        )}
-        {error && <Text style={styles.error}>{error}</Text>}
-        <Button
-          buttonStyle={styles.loginButtonContainer}
-          titleStyle={styles.loginButton}
-          title={signUpActive === true ? "Зарегистрироваться" : "Войти"}
-          onPress={signUpActive === true ? handleCreate : handleLogin}
-        />
-        <Button
-          buttonStyle={styles.signUpSwitchButton}
-          titleStyle={styles.signUpSwitchButtonText}
-          title={
-            signUpActive === true
-              ? "У меня уже есть аккаунт"
-              : "Создать аккаунт"
-          }
-          onPress={handleSignUpActive}
-        />
+
+          <ThemedTextInput
+            type="active"
+            value={password}
+            editable={true}
+            maxLength={50}
+            onChangeText={(text) => setPassword(text)}
+            placeholder="Пароль"
+            secureTextEntry={true}
+          />
+
+          {signUpActive && (
+            <ThemedTextInput
+              type="active"
+              value={repassword}
+              editable={true}
+              maxLength={50}
+              onChangeText={(text) => setRepassword(text)}
+              placeholder="Повторите пароль"
+              secureTextEntry={true}
+            />
+          )}
+          {error && <ThemedText type="error">{error}</ThemedText>}
+          <ThemedButton
+            type="default"
+            title={signUpActive === true ? "Зарегистрироваться" : "Войти"}
+            onPress={signUpActive === true ? handleCreate : handleLogin}
+          />
+          <ThemedButton
+            type="clear"
+            title={
+              signUpActive === true
+                ? "У меня уже есть аккаунт"
+                : "Создать аккаунт"
+            }
+            onPress={handleSignUpActive}
+          />
+        </View>
       </View>
     </TouchableWithoutFeedback>
   );
@@ -167,44 +171,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
-    marginBottom: 80,
     backgroundColor: "#fff",
   },
-  input: {
+  formContainer: {
     width: "100%",
-    borderRadius: 10,
-    backgroundColor: "#eceef5",
-    marginBottom: 15,
-    padding: 20,
-    paddingLeft: 20,
-  },
-  error: {
-    color: "red",
-    fontSize: 12,
-    marginBottom: 10,
-  },
-  loginButtonContainer: {
-    width: "100%",
-    backgroundColor: "#25a9e2",
-    borderRadius: 10,
-    marginTop: 25,
-    padding: 10,
-  },
-  loginButton: {
-    color: "#fff",
-    width: "100%",
-    fontSize: 20,
-    fontWeight: "bold",
-    fontFamily: "Roboto",
-  },
-  signUpSwitchButton: {
-    width: "100%",
-    borderRadius: 10,
-    marginTop: 10,
-    backgroundColor: "white",
-  },
-  signUpSwitchButtonText: {
-    color: "#25a9e2",
-    fontSize: 16,
   },
 });

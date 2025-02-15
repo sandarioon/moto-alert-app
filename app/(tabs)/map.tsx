@@ -1,5 +1,4 @@
 import {
-  Text,
   View,
   Modal,
   Linking,
@@ -7,20 +6,29 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useFocusEffect } from "expo-router";
-import { Button } from "react-native-elements";
-import React, { useContext, useState } from "react";
+import { useRoute } from "@react-navigation/native";
 import { showMessage } from "react-native-flash-message";
 import MapView, { Callout, Marker } from "react-native-maps";
+import React, { useContext, useEffect, useState } from "react";
 
 import { Accident } from "@/context/types";
 import { AuthContext } from "@/context/AuthContext";
+import { ThemedText } from "@/components/ThemedText";
+import { ThemedButton } from "@/components/ThemedButton";
 import { GeoLocationContext } from "@/context/GeoLocationContext";
 
-export default function TabTwoScreen() {
+export default function MapScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const { location, locationErrMsg } = useContext(GeoLocationContext);
   const authContext = useContext(AuthContext);
   const token = authContext?.token;
+
+  const route = useRoute();
+  const params = route.params;
+
+  useEffect(() => {
+    console.log("Map Screen reloaded");
+  }, [params]);
 
   const [accidents, setAccidents] = useState<Accident[]>([]);
   const [selectedAccident, setSelectedAccident] = useState<Accident | null>(
@@ -137,14 +145,12 @@ export default function TabTwoScreen() {
                 }}
               >
                 <View>
-                  <Text style={styles.calloutTextTitle}>{accident.title}</Text>
-                  <Text style={styles.calloutTextDescription}>
-                    {accident.description}
-                  </Text>
-                  <Button
-                    buttonStyle={styles.calloutButton}
-                    titleStyle={styles.calloutButtonTitle}
+                  <ThemedText type="label">{accident.title}</ThemedText>
+                  <ThemedText type="default">{accident.description}</ThemedText>
+                  <ThemedButton
+                    type="default"
                     title="Подробнее"
+                    onPress={() => {}}
                   />
                 </View>
               </Callout>
@@ -159,62 +165,55 @@ export default function TabTwoScreen() {
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <View style={styles.textContainer}>
-              <Text style={styles.modalTextTitle}>ID: </Text>
-              <Text style={styles.modalTextDescription}>
-                {selectedAccident?.id}
-              </Text>
+              <ThemedText type="label">ID: </ThemedText>
+              <ThemedText type="default">{selectedAccident?.id}</ThemedText>
             </View>
 
             <View style={styles.textContainer}>
-              <Text style={styles.modalTextTitle}>Имя: </Text>
-              <Text style={styles.modalTextDescription}>
-                {selectedAccident?.name}
-              </Text>
+              <ThemedText type="label">Имя: </ThemedText>
+              <ThemedText type="default">{selectedAccident?.name}</ThemedText>
             </View>
 
             {selectedAccident?.phone ? (
               <View style={styles.textContainer}>
-                <Text style={styles.modalTextTitle}>Телефон: </Text>
-                <Text
-                  style={styles.calloutPhone}
+                <ThemedText type="label">Телефон: </ThemedText>
+                <ThemedText
+                  type="link"
                   onPress={() =>
                     Linking.openURL(`tel:${selectedAccident?.phone}`)
                   }
                 >
                   {selectedAccident.phone}
-                </Text>
+                </ThemedText>
               </View>
             ) : (
               <View style={styles.textContainer}>
-                <Text style={styles.modalTextTitle}>Телефон: </Text>
-                <Text style={styles.modalTextDescription}>Не указан</Text>
+                <ThemedText type="label">Телефон: </ThemedText>
+                <ThemedText type="default">Не указан</ThemedText>
               </View>
             )}
 
             <View style={styles.textContainer}>
-              <Text style={styles.modalTextTitle}>Пол: </Text>
-              <Text style={styles.modalTextDescription}>
+              <ThemedText type="label">Пол: </ThemedText>
+              <ThemedText type="default">
                 {selectedAccident?.gender === "male" ? "Мужской" : "Женский"}
-              </Text>
+              </ThemedText>
             </View>
 
             <View style={styles.textContainer}>
-              <Text style={styles.modalTextTitle}>Мотоцикл: </Text>
-              <Text style={styles.modalTextDescription}>
+              <ThemedText type="label">Мотоцикл: </ThemedText>
+              <ThemedText type="default">
                 {selectedAccident?.bikeModel || "Не указан"}
-              </Text>
+              </ThemedText>
             </View>
 
-            <Button
-              buttonStyle={styles.modalHelpButton}
-              titleStyle={styles.modalHelpButtonTitle}
+            <ThemedButton
+              type="default"
               title="Отозваться на помощь"
               onPress={() => handleHelpInAccident(selectedAccident?.id)}
             />
-
-            <Button
-              buttonStyle={styles.modalCloseButton}
-              titleStyle={styles.modalCloseButtonTitle}
+            <ThemedButton
+              type="default"
               title="Закрыть"
               onPress={() => {
                 setModalVisible(false);
@@ -228,56 +227,22 @@ export default function TabTwoScreen() {
 }
 
 const styles = StyleSheet.create({
-  textContainer: {
-    flexDirection: "row",
-    marginVertical: 5,
-  },
   container: {
     flex: 1,
     backgroundColor: "#fff",
     justifyContent: "center",
     alignItems: "center",
   },
+  textContainer: {
+    flexDirection: "row",
+    marginVertical: 5,
+  },
   map: {
     width: "100%",
     height: "100%",
   },
-  calloutTextTitle: {
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-  calloutTextDescription: {
-    marginTop: 5,
-    fontSize: 16,
-  },
-  modalTextTitle: {
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-  modalTextDescription: {
-    fontSize: 16,
-  },
-  calloutPhone: {
-    color: "blue",
-    fontSize: 16,
-  },
-  calloutButton: {
-    marginTop: 20,
-  },
-  calloutButtonTitle: {},
-  modalHelpButton: {
-    marginTop: 20,
-    borderRadius: 10,
-  },
-  modalHelpButtonTitle: {},
-  modalCloseButton: {
-    marginTop: 10,
-    borderRadius: 10,
-  },
-  modalCloseButtonTitle: {},
   modalContainer: {
     flex: 1,
-
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "rgba(0, 0, 0, 0.5)",

@@ -7,13 +7,19 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { Linking } from "react-native";
+import * as Location from "expo-location";
 import { Button } from "react-native-elements";
+import { useRoute } from "@react-navigation/native";
 import { useState, useContext, useEffect } from "react";
 
 import { AuthContext } from "@/context/AuthContext";
-import { GeoLocationContext } from "@/context/GeoLocationContext";
+import { ThemedText } from "@/components/ThemedText";
+import { ThemedButton } from "@/components/ThemedButton";
 
 export default function HomeScreen() {
+  const route = useRoute();
+  const params = route.params;
+
   const authContext = useContext(AuthContext);
 
   const [scale] = useState(new Animated.Value(1));
@@ -21,7 +27,40 @@ export default function HomeScreen() {
   const [isLoading, setIsLoading] = useState(true);
 
   const token = authContext?.token;
-  const { location, locationErrMsg } = useContext(GeoLocationContext);
+
+  const [location, setLocation] = useState<Location.LocationObject | null>(
+    null
+  );
+  const [locationErrMsg, setLocationErrMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+    getCurrentLocation();
+  }, []);
+
+  useEffect(() => {
+    console.log("Home Screen reloaded");
+  }, [params]);
+
+  useEffect(() => {
+    fetchCurrentAccident();
+  }, []);
+
+  const getCurrentLocation = async () => {
+    let { status } = await Location.getForegroundPermissionsAsync();
+    console.log("Geo location status", status);
+    if (status !== "granted") {
+      // Permission is not granted, ask for permission
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        setLocationErrMsg("Permission to access location was denied");
+        return;
+      }
+    }
+
+    let location = await Location.getCurrentPositionAsync({});
+    console.log("Location updated");
+    setLocation(location);
+  };
 
   const pulse = () => {
     Animated.sequence([
@@ -40,14 +79,11 @@ export default function HomeScreen() {
 
   pulse();
 
-  useEffect(() => {
-    fetchCurrentAccident();
-  }, []);
-
   const fetchCurrentAccident = async () => {
     if (!token) return;
 
     setIsLoading(true);
+
     try {
       const response = await fetch(`https://moto-alert.ru/accidents/current`, {
         headers: {
@@ -69,6 +105,7 @@ export default function HomeScreen() {
   const handleCreateAccident = async () => {
     if (location && token) {
       try {
+        getCurrentLocation();
         setIsLoading(true);
         const response = await fetch("https://moto-alert.ru/accidents/create", {
           method: "POST",
@@ -159,25 +196,30 @@ export default function HomeScreen() {
         />
       )}
       <View>
-        <Button
-          buttonStyle={styles.emergencyCallButton}
-          titleStyle={styles.emergencyCallButtonTitle}
+        <ThemedButton
+          type="default"
           title="Позвонить 112"
           onPress={() => Linking.openURL("tel:112")}
         />
       </View>
       {accident && (
-        <Text style={styles.accidentInfo}>
+        <ThemedText
+          style={{ textAlign: "center", fontWeight: "bold" }}
+          type="default"
+        >
           Вы сообщили об аварии. Push-уведомления были отправлены всем в радиусе
           50 км от вас. Если вы случайно нажали на кнопку, отмените свой запрос
           о помощи.
-        </Text>
+        </ThemedText>
       )}
-      <Text style={styles.accidentInfo}>
+      <ThemedText
+        style={{ textAlign: "center", fontWeight: "bold" }}
+        type="default"
+      >
         {locationErrMsg
           ? "Для того, чтобы сообщить об аварии вы должны включить геолокацию"
           : ""}
-      </Text>
+      </ThemedText>
     </View>
   );
 }
@@ -225,24 +267,5 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "white",
     fontSize: 24,
-  },
-  emergencyCallButton: {
-    marginTop: 50,
-    backgroundColor: "#25a9e2",
-    borderRadius: 10,
-  },
-  emergencyCallButtonTitle: {
-    fontWeight: "bold",
-    color: "white",
-    fontSize: 24,
-    padding: 10,
-  },
-  accidentInfo: {
-    color: "black",
-    fontWeight: "bold",
-    fontSize: 16,
-    marginTop: 50,
-    marginHorizontal: 20,
-    textAlign: "center",
   },
 });

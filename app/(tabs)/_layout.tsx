@@ -1,6 +1,6 @@
-import React from "react";
 import { Tabs } from "expo-router";
 import { Platform } from "react-native";
+import React, { useState } from "react";
 
 import { Colors } from "@/constants/Colors";
 import { HapticTab } from "@/components/HapticTab";
@@ -10,9 +10,17 @@ import TabBarBackground from "@/components/ui/TabBarBackground";
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const [tabId, setTabId] = useState("index");
+
+  const handleTabPress = (event: any) => {
+    setTabId(event.target.split("-")[0]);
+  };
 
   return (
     <Tabs
+      screenListeners={{
+        tabPress: handleTabPress,
+      }}
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
         headerShown: false,
@@ -29,6 +37,7 @@ export default function TabLayout() {
     >
       <Tabs.Screen
         name="index"
+        initialParams={{ tabId }}
         options={{
           title: "Главная",
           tabBarIcon: ({ color }) => (
@@ -38,6 +47,7 @@ export default function TabLayout() {
       />
       <Tabs.Screen
         name="map"
+        initialParams={{ tabId }}
         options={{
           title: "Карта",
           tabBarIcon: ({ color }) => (
@@ -47,6 +57,7 @@ export default function TabLayout() {
       />
       <Tabs.Screen
         name="profile"
+        initialParams={{ tabId }}
         options={{
           title: "Профиль",
           tabBarIcon: ({ color }) => (

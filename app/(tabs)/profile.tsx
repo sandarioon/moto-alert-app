@@ -1,22 +1,26 @@
 import {
   View,
-  Text,
   Keyboard,
-  TextInput,
   StyleSheet,
   ActivityIndicator,
   TouchableWithoutFeedback,
 } from "react-native";
 import { Checkbox } from "expo-checkbox";
-import { Button } from "react-native-elements";
+import { useRoute } from "@react-navigation/native";
 import { showMessage } from "react-native-flash-message";
 import React, { useContext, useEffect, useState } from "react";
 
 import { validatePhone } from "@/utils/utils";
 import { User, UserGender } from "@/context/types";
+import { ThemedText } from "@/components/ThemedText";
+import { ThemedButton } from "@/components/ThemedButton";
+import { ThemedTextInput } from "@/components/ThemedTextInput";
 import { AuthContext, AuthContextValue } from "@/context/AuthContext";
 
-export default function TabThreeScreen() {
+export default function ProfileScreen() {
+  const route = useRoute();
+  const params = route.params;
+
   const { logout } = React.useContext(AuthContext) as AuthContextValue;
   const authContext = useContext(AuthContext);
   const token = authContext?.token;
@@ -29,6 +33,11 @@ export default function TabThreeScreen() {
     null
   );
   const [isEditMode, setIsEditMode] = useState(false);
+
+  useEffect(() => {
+    console.log("Profile Screen reloaded");
+    fetchUser();
+  }, [params]);
 
   useEffect(() => {
     fetchUser();
@@ -120,11 +129,15 @@ export default function TabThreeScreen() {
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
       <View style={styles.container}>
-        <Text style={styles.title}>Персональные данные</Text>
+        <View style={styles.titleContainer}>
+          <ThemedText type="title">Персональные данные</ThemedText>
+        </View>
 
-        <Text style={styles.label}>Имя и фамилия</Text>
-        <TextInput
-          style={isEditMode ? styles.inputEnabled : styles.inputDisabled}
+        <View style={styles.labelContainer}>
+          <ThemedText type="label">Имя и фамилия</ThemedText>
+        </View>
+        <ThemedTextInput
+          type={isEditMode ? "active" : "inactive"}
           value={user.name}
           editable={isEditMode}
           maxLength={50}
@@ -137,39 +150,46 @@ export default function TabThreeScreen() {
             }
           }}
           placeholder="Иван Иванов"
-          placeholderTextColor={"#ccc"}
         />
         {nameInputError && (
-          <Text style={styles.inputError}>{nameInputError}</Text>
+          <View style={styles.errorTextContainer}>
+            <ThemedText type="error">{nameInputError}</ThemedText>
+          </View>
         )}
 
-        <Text style={styles.label}>Пол</Text>
-        <View style={styles.checkbox}>
+        <View style={styles.labelContainer}>
+          <ThemedText type="label">Пол</ThemedText>
+        </View>
+        <View style={styles.checkboxContainer}>
           <View style={styles.checkboxItem}>
             <Checkbox
+              style={styles.checkbox}
               disabled={!isEditMode}
               value={user.gender === "male"}
               onValueChange={() =>
                 setUser({ ...user, gender: UserGender.MALE })
               }
             />
-            <Text style={styles.checkBoxText}>Мужской</Text>
+            <ThemedText type="default">Мужской</ThemedText>
           </View>
           <View style={styles.checkboxItem}>
             <Checkbox
+              style={styles.checkbox}
               disabled={!isEditMode}
               value={user.gender === "female"}
               onValueChange={() =>
                 setUser({ ...user, gender: UserGender.FEMALE })
               }
             />
-            <Text style={styles.checkBoxText}>Женский</Text>
+            <ThemedText type="default">Женский</ThemedText>
           </View>
         </View>
 
-        <Text style={styles.label}>Телефон</Text>
-        <TextInput
-          style={isEditMode ? styles.inputEnabled : styles.inputDisabled}
+        <View style={styles.labelContainer}>
+          <ThemedText type="label">Телефон</ThemedText>
+        </View>
+        <ThemedTextInput
+          type={isEditMode ? "active" : "inactive"}
           value={user.phone}
           editable={isEditMode}
           maxLength={11}
@@ -183,16 +203,19 @@ export default function TabThreeScreen() {
             }
           }}
           placeholder="8XXXXXXXXXX"
-          placeholderTextColor={"#ccc"}
           keyboardType="phone-pad"
         />
         {phoneInputError && (
-          <Text style={styles.inputError}>{phoneInputError}</Text>
+          <View style={styles.errorTextContainer}>
+            <ThemedText type="error">{phoneInputError}</ThemedText>
+          </View>
         )}
 
-        <Text style={styles.label}>Марка и модель мотоцикла</Text>
-        <TextInput
-          style={isEditMode ? styles.inputEnabled : styles.inputDisabled}
+        <View style={styles.labelContainer}>
+          <ThemedText type="label">Марка и модель мотоцикла</ThemedText>
+        </View>
+        <ThemedTextInput
+          type={isEditMode ? "active" : "inactive"}
           value={user.bikeModel}
           editable={isEditMode}
           maxLength={50}
@@ -205,42 +228,36 @@ export default function TabThreeScreen() {
             }
           }}
           placeholder="Yamaha R1"
-          placeholderTextColor={"#ccc"}
         />
         {bikeModelInputError && (
-          <Text style={styles.inputError}>{bikeModelInputError}</Text>
+          <View style={styles.errorTextContainer}>
+            <ThemedText type="error">{bikeModelInputError}</ThemedText>
+          </View>
         )}
         {isEditMode ? (
           <View style={{ flex: 1 }}>
-            <Button
-              buttonStyle={styles.saveButton}
-              titleStyle={styles.buttonTitle}
-              title={"Сохранить"}
+            <ThemedButton
+              type="default"
+              title="Сохранить"
               onPress={handleSave}
             />
-            <Button
-              buttonStyle={styles.cancelButton}
-              titleStyle={styles.buttonTitle}
+
+            <ThemedButton
+              type="inactive"
               title="Отменить"
               onPress={handleEditMode}
             />
           </View>
         ) : (
           <View style={{ flex: 1 }}>
-            <Button
-              buttonStyle={styles.editButton}
-              titleStyle={styles.buttonTitle}
-              title={"Редактировать"}
+            <ThemedButton
+              type="default"
+              title="Редактировать"
               onPress={handleEditMode}
             />
           </View>
         )}
-        <Button
-          buttonStyle={styles.exitButton}
-          titleStyle={styles.buttonTitle}
-          title={"Выйти"}
-          onPress={logout}
-        />
+        <ThemedButton type="error" title="Выйти" onPress={logout} />
         <View style={{ height: 100 }}></View>
       </View>
     </TouchableWithoutFeedback>
@@ -254,41 +271,15 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     padding: 20,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    textAlign: "center",
+  titleContainer: {
     marginTop: 50,
     marginBottom: 20,
   },
-  label: {
+  labelContainer: {
     width: "100%",
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 5,
-    textAlign: "left",
+    marginBottom: 10,
   },
-  inputEnabled: {
-    width: "100%",
-    borderRadius: 10,
-    backgroundColor: "#ffffff",
-    borderWidth: 1,
-    borderColor: "#eceef5",
-    marginBottom: 15,
-    padding: 20,
-    paddingLeft: 20,
-  },
-  inputDisabled: {
-    width: "100%",
-    borderRadius: 10,
-    backgroundColor: "#eceef5",
-    borderWidth: 1,
-    borderColor: "#eceef5",
-    marginBottom: 15,
-    padding: 20,
-    paddingLeft: 20,
-  },
-  checkbox: {
+  checkboxContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     marginTop: 15,
@@ -299,43 +290,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
   },
-  checkBoxText: {
-    marginLeft: 10,
+  checkbox: {
+    marginRight: 10,
   },
-  editButton: {
-    width: "100%",
-    backgroundColor: "#25a9e2",
-    borderRadius: 10,
-    padding: 10,
-    marginTop: 15,
-  },
-  cancelButton: {
-    backgroundColor: "#808080",
-    borderRadius: 10,
-    padding: 10,
-    marginTop: 15,
-  },
-  saveButton: {
-    backgroundColor: "#25a9e2",
-    borderRadius: 10,
-    padding: 10,
-    marginTop: 15,
-  },
-  exitButton: {
-    width: "100%",
-    backgroundColor: "#FF0033",
-    borderRadius: 10,
-    padding: 10,
-    marginTop: 15,
-  },
-  buttonTitle: {
-    color: "#FFFFFF",
-    fontSize: 20,
-    fontWeight: "bold",
-  },
-  inputError: {
-    color: "red",
-    fontSize: 12,
+  errorTextContainer: {
     marginBottom: 10,
   },
 });
