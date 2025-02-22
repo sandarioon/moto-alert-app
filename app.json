@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "moto-alert",
+    "name": "Мото ДТП",
     "slug": "moto-alert",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -17,6 +17,11 @@
     "ios": {
       "config": {
         "usesNonExemptEncryption": false
+      },
+      "icon": {
+        "dark": "./assets/images/icon.png",
+        "light": "./assets/images/icon.png",
+        "tinted": "./assets/images/icon.png"
       },
       "supportsTablet": true,
       "bundleIdentifier": "com.sandarion.motoalert"
