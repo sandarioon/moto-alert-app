@@ -195,7 +195,7 @@ export default function MapScreen() {
             <View style={styles.textContainer}>
               <ThemedText type="label">Пол: </ThemedText>
               <ThemedText type="default">
-                {selectedAccident?.gender === "male" ? "Мужской" : "Женский"}
+                {selectedAccident?.gender === "MALE" ? "Мужской" : "Женский"}
               </ThemedText>
             </View>
 
