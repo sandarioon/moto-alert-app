@@ -22,8 +22,7 @@ export default function ProfileScreen() {
   const params = route.params;
 
   const { logout } = React.useContext(AuthContext) as AuthContextValue;
-  const authContext = useContext(AuthContext);
-  const token = authContext?.token;
+  const { authToken } = useContext(AuthContext);
 
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -44,13 +43,13 @@ export default function ProfileScreen() {
   }, []);
 
   const fetchUser = async () => {
-    if (!token) return;
+    if (!authToken) return;
     try {
       setIsLoading(true);
       const response = await fetch("https://moto-alert.ru/user/", {
         method: "GET",
         headers: {
-          Authorization: token,
+          Authorization: authToken,
         },
       });
 
@@ -82,7 +81,7 @@ export default function ProfileScreen() {
     if (!user || (!user.name && !user.phone && !user.bikeModel && !user.gender))
       return;
     if (nameInputError || phoneInputError || bikeModelInputError) return;
-    if (!token || !user) return;
+    if (!authToken || !user) return;
 
     const body: Partial<User> = {};
     if (user.name) body.name = user.name;
@@ -95,7 +94,7 @@ export default function ProfileScreen() {
       const response = await fetch("https://moto-alert.ru/user/update", {
         method: "POST",
         headers: {
-          Authorization: token,
+          Authorization: authToken,
           "Content-Type": "application/json",
         },
         body: JSON.stringify(body),
@@ -138,7 +137,7 @@ export default function ProfileScreen() {
         </View>
         <ThemedTextInput
           type={isEditMode ? "active" : "inactive"}
-          value={user.name}
+          value={isEditMode ? user.name : user.name || " "}
           editable={isEditMode}
           maxLength={50}
           onChangeText={(text) => {
@@ -165,7 +164,7 @@ export default function ProfileScreen() {
             <Checkbox
               style={styles.checkbox}
               disabled={!isEditMode}
-              value={user.gender === "male"}
+              value={user.gender === "MALE"}
               onValueChange={() =>
                 setUser({ ...user, gender: UserGender.MALE })
               }
@@ -176,7 +175,7 @@ export default function ProfileScreen() {
             <Checkbox
               style={styles.checkbox}
               disabled={!isEditMode}
-              value={user.gender === "female"}
+              value={user.gender === "FEMALE"}
               onValueChange={() =>
                 setUser({ ...user, gender: UserGender.FEMALE })
               }
@@ -190,7 +189,7 @@ export default function ProfileScreen() {
         </View>
         <ThemedTextInput
           type={isEditMode ? "active" : "inactive"}
-          value={user.phone}
+          value={isEditMode ? user.phone : user.phone || " "}
           editable={isEditMode}
           maxLength={11}
           onChangeText={(phone) => {
@@ -216,7 +215,7 @@ export default function ProfileScreen() {
         </View>
         <ThemedTextInput
           type={isEditMode ? "active" : "inactive"}
-          value={user.bikeModel}
+          value={isEditMode ? user.bikeModel : user.bikeModel || " "}
           editable={isEditMode}
           maxLength={50}
           onChangeText={(bikeModel) => {

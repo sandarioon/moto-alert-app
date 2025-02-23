@@ -20,8 +20,7 @@ import { GeoLocationContext } from "@/context/GeoLocationContext";
 export default function MapScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const { location, locationErrMsg } = useContext(GeoLocationContext);
-  const authContext = useContext(AuthContext);
-  const token = authContext?.token;
+  const { authToken } = useContext(AuthContext);
 
   const route = useRoute();
   const params = route.params;
@@ -37,13 +36,13 @@ export default function MapScreen() {
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchAccidents = async () => {
-    if (!token) return;
+    if (!authToken) return;
 
     setIsLoading(true);
     try {
       const response = await fetch(`https://moto-alert.ru/accidents/`, {
         headers: {
-          Authorization: token,
+          Authorization: authToken,
         },
       });
       const data = await response.json();
@@ -59,7 +58,7 @@ export default function MapScreen() {
   };
 
   const handleHelpInAccident = async (accidentId: number | undefined) => {
-    if (location && token && accidentId) {
+    if (location && authToken && accidentId) {
       try {
         setIsLoading(true);
         const response = await fetch(
@@ -67,7 +66,7 @@ export default function MapScreen() {
           {
             method: "POST",
             headers: {
-              Authorization: token,
+              Authorization: authToken,
               "Content-Type": "application/json",
             },
           }
@@ -92,7 +91,7 @@ export default function MapScreen() {
   useFocusEffect(
     React.useCallback(() => {
       fetchAccidents();
-    }, [token])
+    }, [authToken])
   );
 
   if (!location || locationErrMsg) {

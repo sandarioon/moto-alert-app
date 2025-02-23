@@ -1,5 +1,6 @@
 import { createContext, useEffect, useState } from "react";
 import * as Location from "expo-location";
+import { IProvider } from "./types";
 
 export interface GeoLocationContextValue {
   location: Location.LocationObject | null;
@@ -13,9 +14,7 @@ const GeoLocationContext = createContext<GeoLocationContextValue>({
   updateLocation: () => {},
 });
 
-const GeoLocationProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+const GeoLocationProvider: IProvider = ({ children }) => {
   const [location, setLocation] = useState<Location.LocationObject | null>(
     null
   );

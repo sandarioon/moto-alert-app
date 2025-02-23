@@ -1,6 +1,7 @@
+export type IProvider = React.FC<{ children: React.ReactNode }>;
 export enum UserGender {
-  MALE = "male",
-  FEMALE = "female",
+  MALE = "MALE",
+  FEMALE = "FEMALE",
 }
 
 export interface User {

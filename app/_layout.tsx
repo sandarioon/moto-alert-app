@@ -45,8 +45,8 @@ export default function RootLayout() {
           <GeoLocationProvider>
             <AuthContext.Consumer>
               {(authContext) => {
-                if (authContext && authContext.token) {
-                  if (!authContext.token) {
+                if (authContext && authContext.authToken) {
+                  if (!authContext.authToken) {
                     return <Login />;
                   }
 

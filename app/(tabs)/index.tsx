@@ -1,41 +1,38 @@
-import {
-  Text,
-  View,
-  Animated,
-  StyleSheet,
-  TouchableOpacity,
-  ActivityIndicator,
-} from "react-native";
 import { Linking } from "react-native";
-import * as Location from "expo-location";
 import { Button } from "react-native-elements";
 import { useRoute } from "@react-navigation/native";
 import { useState, useContext, useEffect } from "react";
+import { View, StyleSheet, ActivityIndicator } from "react-native";
 
+import useAxios from "@/hooks/useAxios";
+import { Accident } from "@/context/types";
 import { AuthContext } from "@/context/AuthContext";
 import { ThemedText } from "@/components/ThemedText";
+import { PulseButton } from "@/components/PulseButton";
 import { ThemedButton } from "@/components/ThemedButton";
+import { getCurrentAccident, getProfile } from "@/api/requests";
+import { GeoLocationContext } from "@/context/GeoLocationContext";
 
 export default function HomeScreen() {
   const route = useRoute();
   const params = route.params;
 
-  const authContext = useContext(AuthContext);
+  const { authToken } = useContext(AuthContext);
+  const { location, locationErrMsg, updateLocation } =
+    useContext(GeoLocationContext);
 
-  const [scale] = useState(new Animated.Value(1));
-  const [accident, setAccident] = useState<any>(null);
+  const [currentAccident, setCurrentAccident] = useState<Accident | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const token = authContext?.token;
-
-  const [location, setLocation] = useState<Location.LocationObject | null>(
-    null
-  );
-  const [locationErrMsg, setLocationErrMsg] = useState<string | null>(null);
-
-  useEffect(() => {
-    getCurrentLocation();
-  }, []);
+  // const { response } = useAxios({
+  //   method: "GET",
+  //   url: getProfile,
+  //   headers: {
+  //     accept: "*/*",
+  //     Authorization: authToken,
+  //   },
+  // });
+  // console.log("response", JSON.stringify(response?.data));
 
   useEffect(() => {
     console.log("Home Screen reloaded");
@@ -45,56 +42,25 @@ export default function HomeScreen() {
     fetchCurrentAccident();
   }, []);
 
-  const getCurrentLocation = async () => {
-    let { status } = await Location.getForegroundPermissionsAsync();
-    console.log("Geo location status", status);
-    if (status !== "granted") {
-      // Permission is not granted, ask for permission
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        setLocationErrMsg("Permission to access location was denied");
-        return;
-      }
-    }
-
-    let location = await Location.getCurrentPositionAsync({});
-    console.log("Location updated");
-    setLocation(location);
-  };
-
-  const pulse = () => {
-    Animated.sequence([
-      Animated.timing(scale, {
-        toValue: 1.1,
-        duration: 300,
-        useNativeDriver: false,
-      }),
-      Animated.timing(scale, {
-        toValue: 1,
-        duration: 300,
-        useNativeDriver: false,
-      }),
-    ]).start(() => pulse());
-  };
-
-  pulse();
-
   const fetchCurrentAccident = async () => {
-    if (!token) return;
+    if (!authToken) return;
 
     setIsLoading(true);
 
     try {
-      const response = await fetch(`https://moto-alert.ru/accidents/current`, {
-        headers: {
-          Authorization: token,
-        },
-      });
+      const response = await fetch(
+        `https://moto-alert.ru${getCurrentAccident}`,
+        {
+          headers: {
+            Authorization: authToken,
+          },
+        }
+      );
       const data = await response.json();
       if (data.error) throw new Error(JSON.stringify(data));
       console.log("Fetched current accident", data);
 
-      setAccident(data.accident);
+      setCurrentAccident(data.accident);
     } catch (error) {
       console.log("Error:", error);
     } finally {
@@ -103,14 +69,14 @@ export default function HomeScreen() {
   };
 
   const handleCreateAccident = async () => {
-    if (location && token) {
+    if (location && authToken) {
       try {
-        getCurrentLocation();
+        updateLocation();
         setIsLoading(true);
         const response = await fetch("https://moto-alert.ru/accidents/create", {
           method: "POST",
           headers: {
-            Authorization: token,
+            Authorization: authToken,
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
@@ -123,7 +89,7 @@ export default function HomeScreen() {
         if (data.error) throw new Error(JSON.stringify(data));
         console.log("Created accident", data);
 
-        setAccident(data);
+        setCurrentAccident(data);
       } catch (error) {
         console.log("Error:", error);
       } finally {
@@ -133,13 +99,13 @@ export default function HomeScreen() {
   };
 
   const handleCancelAccident = async () => {
-    if (!token) return;
+    if (!authToken) return;
     try {
       setIsLoading(true);
       const response = await fetch("https://moto-alert.ru/accidents/cancel", {
         method: "POST",
         headers: {
-          Authorization: token,
+          Authorization: authToken,
         },
       });
 
@@ -147,7 +113,7 @@ export default function HomeScreen() {
       if (data.error) throw new Error(JSON.stringify(data));
       console.log("Canceled accident", data);
 
-      setAccident(null);
+      setCurrentAccident(null);
     } catch (error) {
       console.log("Error:", error);
     } finally {
@@ -165,24 +131,8 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      {accident ? (
-        <TouchableOpacity>
-          <Animated.View
-            onTouchStart={handleCancelAccident}
-            style={{
-              backgroundColor: "#FF0000",
-              borderRadius: "50%",
-              padding: 20,
-              width: 250,
-              height: 250,
-              justifyContent: "center",
-              alignItems: "center",
-              transform: [{ scale }],
-            }}
-          >
-            <Text style={styles.activeAccidentButtonTitle}>Отменить</Text>
-          </Animated.View>
-        </TouchableOpacity>
+      {currentAccident ? (
+        <PulseButton onTouchStart={handleCancelAccident} />
       ) : (
         <Button
           buttonStyle={
@@ -202,7 +152,7 @@ export default function HomeScreen() {
           onPress={() => Linking.openURL("tel:112")}
         />
       </View>
-      {accident && (
+      {currentAccident && (
         <ThemedText
           style={{ textAlign: "center", fontWeight: "bold" }}
           type="default"
@@ -239,11 +189,6 @@ const styles = StyleSheet.create({
     height: 250,
     justifyContent: "center",
     alignItems: "center",
-  },
-  activeAccidentButtonTitle: {
-    fontWeight: "bold",
-    color: "white",
-    fontSize: 24,
   },
   disabledAccidentButton: {
     backgroundColor: "#eceef5",
