@@ -4,13 +4,12 @@ import { useRoute } from "@react-navigation/native";
 import { useState, useContext, useEffect } from "react";
 import { View, StyleSheet, ActivityIndicator } from "react-native";
 
-import useAxios from "@/hooks/useAxios";
 import { Accident } from "@/context/types";
 import { AuthContext } from "@/context/AuthContext";
+import { getCurrentAccident } from "@/api/requests";
 import { ThemedText } from "@/components/ThemedText";
 import { PulseButton } from "@/components/PulseButton";
 import { ThemedButton } from "@/components/ThemedButton";
-import { getCurrentAccident, getProfile } from "@/api/requests";
 import { GeoLocationContext } from "@/context/GeoLocationContext";
 
 export default function HomeScreen() {
@@ -23,16 +22,6 @@ export default function HomeScreen() {
 
   const [currentAccident, setCurrentAccident] = useState<Accident | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-
-  // const { response } = useAxios({
-  //   method: "GET",
-  //   url: getProfile,
-  //   headers: {
-  //     accept: "*/*",
-  //     Authorization: authToken,
-  //   },
-  // });
-  // console.log("response", JSON.stringify(response?.data));
 
   useEffect(() => {
     console.log("Home Screen reloaded");
