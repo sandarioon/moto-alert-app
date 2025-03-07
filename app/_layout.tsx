@@ -11,7 +11,6 @@ import { StatusBar } from "expo-status-bar";
 import * as SplashScreen from "expo-splash-screen";
 import FlashMessage from "react-native-flash-message";
 
-import Login from "@/screens/Login";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { AuthContext, AuthProvider } from "@/context/AuthContext";
 import { GeoLocationProvider } from "@/context/GeoLocationContext";
@@ -44,25 +43,19 @@ export default function RootLayout() {
         >
           <GeoLocationProvider>
             <AuthContext.Consumer>
-              {(authContext) => {
-                if (authContext && authContext.authToken) {
-                  if (!authContext.authToken) {
-                    return <Login />;
-                  }
-
-                  return (
-                    <Stack>
-                      <Stack.Screen
-                        name="(tabs)"
-                        options={{ headerShown: false }}
-                      />
-                      <Stack.Screen name="+not-found" />
-                    </Stack>
-                  );
-                } else {
-                  return <Login />;
-                }
-              }}
+              {() => (
+                <Stack screenOptions={{ headerShown: false }}>
+                  <Stack.Screen
+                    name="(auth)"
+                    options={{ headerShown: false }}
+                  />
+                  <Stack.Screen
+                    name="(tabs)"
+                    options={{ headerShown: false }}
+                  />
+                  <Stack.Screen name="+not-found" />
+                </Stack>
+              )}
             </AuthContext.Consumer>
           </GeoLocationProvider>
         </ThemeProvider>

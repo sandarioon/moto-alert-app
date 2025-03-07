@@ -45,25 +45,21 @@ const styles = StyleSheet.create({
     backgroundColor: "#25a9e2",
     borderRadius: 10,
     padding: 10,
-    marginTop: 15,
   },
   success: {
     backgroundColor: "#2d9717",
     borderRadius: 10,
     padding: 10,
-    marginTop: 15,
   },
   error: {
     backgroundColor: "#FF0033",
     borderRadius: 10,
     padding: 10,
-    marginTop: 15,
   },
   inactive: {
     backgroundColor: "#808080",
     borderRadius: 10,
     padding: 10,
-    marginTop: 15,
   },
   clear: {
     width: "100%",

@@ -12,16 +12,16 @@ import React, { useContext, useEffect, useState } from "react";
 
 import { validatePhone } from "@/utils/utils";
 import { User, UserGender } from "@/context/types";
+import { AuthContext } from "@/context/AuthContext";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedButton } from "@/components/ThemedButton";
 import { ThemedTextInput } from "@/components/ThemedTextInput";
-import { AuthContext, AuthContextValue } from "@/context/AuthContext";
 
 export default function ProfileScreen() {
   const route = useRoute();
   const params = route.params;
 
-  const { logout } = React.useContext(AuthContext) as AuthContextValue;
+  const { removeAuthToken } = React.useContext(AuthContext);
   const { authToken } = useContext(AuthContext);
 
   const [user, setUser] = useState<User | null>(null);
@@ -256,8 +256,7 @@ export default function ProfileScreen() {
             />
           </View>
         )}
-        <ThemedButton type="error" title="Выйти" onPress={logout} />
-        <View style={{ height: 100 }}></View>
+        <ThemedButton type="error" title="Выйти" onPress={removeAuthToken} />
       </View>
     </TouchableWithoutFeedback>
   );
@@ -271,18 +270,18 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   titleContainer: {
-    marginTop: 50,
-    marginBottom: 20,
+    marginTop: 30,
+    marginBottom: 10,
   },
   labelContainer: {
     width: "100%",
+    marginTop: 10,
     marginBottom: 10,
   },
   checkboxContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 15,
-    marginBottom: 25,
+    marginBottom: 5,
     marginHorizontal: 5,
   },
   checkboxItem: {

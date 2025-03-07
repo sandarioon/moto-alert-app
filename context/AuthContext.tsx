@@ -1,35 +1,47 @@
-import { createContext, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { IProvider } from "./types";
 import { AUTH_TOKEN_KEY } from "./constants";
+import { router } from "expo-router";
 
 export interface AuthContextValue {
   authToken: string;
-  login: (token: string) => void;
-  logout: () => void;
+  updateAuthToken: (authToken: string) => void;
+  removeAuthToken: () => void;
 }
 
 const AuthContext = createContext<AuthContextValue>({
   authToken: "",
-  login: () => {},
-  logout: () => {},
+  updateAuthToken: () => {},
+  removeAuthToken: () => {},
 });
 
 const AuthProvider: IProvider = ({ children }) => {
   const [authToken, setAuthToken] = useState<string>("");
 
-  const login = (token: string) => {
+  const updateAuthToken = (token: string) => {
     setAuthToken(token);
+    router.push("/(tabs)");
   };
 
-  const logout = () => {
+  const removeAuthToken = () => {
     setAuthToken("");
     AsyncStorage.removeItem(AUTH_TOKEN_KEY);
+    router.push("/(auth)");
   };
 
+  useEffect(() => {
+    AsyncStorage.getItem(AUTH_TOKEN_KEY).then((authToken) => {
+      console.log("Auth token is", authToken);
+      setAuthToken(authToken || "");
+    });
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ authToken, login, logout }}>
+    <AuthContext.Provider
+      value={{ authToken, updateAuthToken, removeAuthToken }}
+    >
       {children}
     </AuthContext.Provider>
   );

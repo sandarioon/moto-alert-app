@@ -17,8 +17,10 @@ Notifications.setNotificationHandler({
   }),
 });
 
-const PushNotificationsContext =
-  createContext<PushNotificationsContextValue | null>(null);
+const PushNotificationsContext = createContext<PushNotificationsContextValue>({
+  expoPushToken: "",
+  notification: undefined,
+});
 
 const PushNotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -33,7 +35,7 @@ const PushNotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     registerForPushNotificationsAsync()
       .then((expoPushToken) => setExpoPushToken(expoPushToken ?? ""))
-      .catch((error: any) => setExpoPushToken(`${error}`));
+      .catch((error: any) => setExpoPushToken(""));
 
     notificationListener.current =
       Notifications.addNotificationReceivedListener((notification) => {

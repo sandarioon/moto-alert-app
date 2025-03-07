@@ -50,8 +50,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
     borderWidth: 1,
     borderColor: "#959595",
-    marginBottom: 15,
-    padding: 20,
+    padding: 15,
     paddingLeft: 20,
   },
   inactive: {
@@ -59,8 +58,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#eceef5",
     borderWidth: 1,
     borderColor: "#eceef5",
-    marginBottom: 15,
-    padding: 20,
+    padding: 15,
     paddingLeft: 20,
   },
 });

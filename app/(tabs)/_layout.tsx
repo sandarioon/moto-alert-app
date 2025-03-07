@@ -1,10 +1,10 @@
 import { Tabs } from "expo-router";
 import { Platform } from "react-native";
 import React, { useState } from "react";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
 
 import { Colors } from "@/constants/Colors";
 import { HapticTab } from "@/components/HapticTab";
-import { IconSymbol } from "@/components/ui/IconSymbol";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import TabBarBackground from "@/components/ui/TabBarBackground";
 
@@ -29,7 +29,7 @@ export default function TabLayout() {
         tabBarStyle: Platform.select({
           ios: {
             // Use a transparent background on iOS to show the blur effect
-            position: "absolute",
+            // position: "absolute",
           },
           default: {},
         }),
@@ -41,7 +41,7 @@ export default function TabLayout() {
         options={{
           title: "Главная",
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="house.fill" color={color} />
+            <FontAwesome name="home" size={24} color={color} />
           ),
         }}
       />
@@ -51,7 +51,7 @@ export default function TabLayout() {
         options={{
           title: "Карта",
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="paperplane.fill" color={color} />
+            <FontAwesome name="map-marker" size={24} color={color} />
           ),
         }}
       />
@@ -61,7 +61,7 @@ export default function TabLayout() {
         options={{
           title: "Профиль",
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="person.fill" color={color} />
+            <FontAwesome name="user" size={24} color={color} />
           ),
         }}
       />
