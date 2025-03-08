@@ -15,6 +15,7 @@ export interface User {
   longitude: number;
   name: string;
   phone: string;
+  password: string;
 }
 
 export interface Accident {

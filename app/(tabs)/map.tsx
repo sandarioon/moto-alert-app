@@ -40,11 +40,14 @@ export default function MapScreen() {
 
     setIsLoading(true);
     try {
-      const response = await fetch(`https://moto-alert.ru/accidents/`, {
-        headers: {
-          Authorization: authToken,
-        },
-      });
+      const response = await fetch(
+        process.env.EXPO_PUBLIC_API_URL + "/accidents/",
+        {
+          headers: {
+            Authorization: authToken,
+          },
+        }
+      );
       const data = await response.json();
       if (data.error) throw new Error(JSON.stringify(data));
       console.log("Fetched accidents", data);
@@ -62,7 +65,7 @@ export default function MapScreen() {
       try {
         setIsLoading(true);
         const response = await fetch(
-          "https://moto-alert.ru/accidents/help/" + accidentId,
+          process.env.EXPO_PUBLIC_API_URL + "/accidents/help/" + accidentId,
           {
             method: "POST",
             headers: {

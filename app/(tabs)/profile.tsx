@@ -15,6 +15,7 @@ import { User, UserGender } from "@/context/types";
 import { AuthContext } from "@/context/AuthContext";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedButton } from "@/components/ThemedButton";
+import { GET_PROFILE, UPDATE_USER } from "@/api/requests";
 import { ThemedTextInput } from "@/components/ThemedTextInput";
 
 export default function ProfileScreen() {
@@ -26,11 +27,9 @@ export default function ProfileScreen() {
 
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [nameInputError, setNameInputError] = useState<string | null>(null);
-  const [phoneInputError, setPhoneInputError] = useState<string | null>(null);
-  const [bikeModelInputError, setBikeModelInputError] = useState<string | null>(
-    null
-  );
+  const [nameInputError, setNameInputError] = useState("");
+  const [phoneInputError, setPhoneInputError] = useState("");
+  const [bikeModelInputError, setBikeModelInputError] = useState("");
   const [isEditMode, setIsEditMode] = useState(false);
 
   useEffect(() => {
@@ -42,79 +41,88 @@ export default function ProfileScreen() {
     fetchUser();
   }, []);
 
-  const fetchUser = async () => {
-    if (!authToken) return;
-    try {
-      setIsLoading(true);
-      const response = await fetch("https://moto-alert.ru/user/", {
-        method: "GET",
-        headers: {
-          Authorization: authToken,
-        },
+  const fetchUser = () => {
+    setIsLoading(true);
+    const url = process.env.EXPO_PUBLIC_API_URL + GET_PROFILE;
+    const options = {
+      method: "GET",
+      headers: {
+        Authorization: authToken,
+      },
+    };
+    fetch(url, options)
+      .then((response) => response.json())
+      .then((data) => {
+        console.info(`${options.method} ${url} response:`, data);
+        if (data.error) {
+          showMessage({
+            duration: 3000,
+            message: "Не удалось загрузить данные о пользователе",
+            type: "danger",
+          });
+          throw new Error(data.message);
+        } else {
+          setUser(data.data);
+        }
+      })
+      .catch((error) => {
+        console.error(`${options.method} ${url} error:`, error.message);
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
-
-      const data = await response.json();
-      if (data.error) throw new Error(JSON.stringify(data));
-      console.log("Fetched user", data);
-
-      setUser(data);
-    } catch (error) {
-      console.log("Error:", error);
-      showMessage({
-        duration: 3000,
-        message: "Не удалось загрузить данные о пользователе",
-        type: "danger",
-      });
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   const handleEditMode = () => {
-    setNameInputError(null);
-    setPhoneInputError(null);
-    setBikeModelInputError(null);
+    setNameInputError("");
+    setPhoneInputError("");
+    setBikeModelInputError("");
     setIsEditMode(!isEditMode);
   };
 
-  const handleSave = async () => {
+  const updateUser = () => {
     if (!user || (!user.name && !user.phone && !user.bikeModel && !user.gender))
       return;
     if (nameInputError || phoneInputError || bikeModelInputError) return;
     if (!authToken || !user) return;
 
+    setIsLoading(true);
+    const url = process.env.EXPO_PUBLIC_API_URL + UPDATE_USER;
     const body: Partial<User> = {};
     if (user.name) body.name = user.name;
     if (user.phone) body.phone = user.phone;
     if (user.bikeModel) body.bikeModel = user.bikeModel;
     if (user.gender) body.gender = user.gender;
+    const options = {
+      method: "POST",
+      headers: {
+        Authorization: authToken,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    };
 
-    try {
-      setIsLoading(true);
-      const response = await fetch("https://moto-alert.ru/user/update", {
-        method: "POST",
-        headers: {
-          Authorization: authToken,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(body),
+    fetch(url, options)
+      .then((response) => response.json())
+      .then((data) => {
+        console.info(`${options.method} ${url} response:`, data);
+        if (data.error) {
+          showMessage({
+            duration: 3000,
+            message: "Не удалось обновить данные пользователя",
+            type: "danger",
+          });
+          throw new Error(data.message);
+        } else {
+          setUser(data.data);
+        }
+      })
+      .catch((error) => {
+        console.error(`${options.method} ${url} error:`, error.message);
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
-
-      const data = await response.json();
-      if (data.error) throw new Error(JSON.stringify(data));
-      console.log("User data updated successfully", JSON.stringify(data));
-
-      setIsEditMode(false);
-    } catch (error) {
-      console.error("Error updating user data:", error);
-      showMessage({
-        duration: 3000,
-        message: "Не удалось сохранить данные о пользователе",
-        type: "danger",
-      });
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   if (isLoading || !user) {
@@ -137,7 +145,7 @@ export default function ProfileScreen() {
         </View>
         <ThemedTextInput
           type={isEditMode ? "active" : "inactive"}
-          value={isEditMode ? user.name : user.name || " "}
+          value={user.name}
           editable={isEditMode}
           maxLength={50}
           onChangeText={(text) => {
@@ -145,7 +153,7 @@ export default function ProfileScreen() {
             if (text.length < 2) {
               setNameInputError("Имя должно содержать не менее двух символов");
             } else {
-              setNameInputError(null);
+              setNameInputError("");
             }
           }}
           placeholder="Иван Иванов"
@@ -189,14 +197,13 @@ export default function ProfileScreen() {
         </View>
         <ThemedTextInput
           type={isEditMode ? "active" : "inactive"}
-          value={isEditMode ? user.phone : user.phone || " "}
+          value={user.phone}
           editable={isEditMode}
-          maxLength={11}
+          maxLength={12}
           onChangeText={(phone) => {
             setUser({ ...user, phone: phone });
-
             if (validatePhone(phone)) {
-              setPhoneInputError(null);
+              setPhoneInputError("");
             } else {
               setPhoneInputError("Укажите номер телефона");
             }
@@ -215,7 +222,7 @@ export default function ProfileScreen() {
         </View>
         <ThemedTextInput
           type={isEditMode ? "active" : "inactive"}
-          value={isEditMode ? user.bikeModel : user.bikeModel || " "}
+          value={user.bikeModel}
           editable={isEditMode}
           maxLength={50}
           onChangeText={(bikeModel) => {
@@ -223,7 +230,7 @@ export default function ProfileScreen() {
             if (bikeModel.length < 4) {
               setBikeModelInputError("Не менее трех символов");
             } else {
-              setBikeModelInputError(null);
+              setBikeModelInputError("");
             }
           }}
           placeholder="Yamaha R1"
@@ -234,21 +241,22 @@ export default function ProfileScreen() {
           </View>
         )}
         {isEditMode ? (
-          <View style={{ flex: 1 }}>
+          <View style={{ flex: 1, marginTop: 15 }}>
             <ThemedButton
               type="default"
               title="Сохранить"
-              onPress={handleSave}
+              onPress={updateUser}
             />
 
             <ThemedButton
+              buttonStyle={{ marginTop: 15 }}
               type="inactive"
               title="Отменить"
               onPress={handleEditMode}
             />
           </View>
         ) : (
-          <View style={{ flex: 1 }}>
+          <View style={{ flex: 1, marginTop: 15 }}>
             <ThemedButton
               type="default"
               title="Редактировать"

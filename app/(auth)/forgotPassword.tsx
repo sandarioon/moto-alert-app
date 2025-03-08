@@ -5,49 +5,32 @@ import {
   TouchableWithoutFeedback,
 } from "react-native";
 import { router } from "expo-router";
-import React, { useContext, useEffect, useState } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import React, { useState } from "react";
 
-import { LOGIN } from "@/api/requests";
 import { validateEmail } from "@/utils/utils";
-import { AuthContext } from "@/context/AuthContext";
+import { FORGOT_PASSWORD } from "@/api/requests";
 import { ThemedText } from "@/components/ThemedText";
-import { AUTH_TOKEN_KEY } from "@/context/constants";
 import { ThemedButton } from "@/components/ThemedButton";
 import { ThemedTextInput } from "@/components/ThemedTextInput";
-import { GeoLocationContext } from "@/context/GeoLocationContext";
-import { PushNotificationsContext } from "@/context/PushNotificationsContext";
 
-export default function LoginScreen() {
-  const { updateAuthToken } = useContext(AuthContext);
-  const { location } = useContext(GeoLocationContext);
-  const { expoPushToken } = useContext(PushNotificationsContext);
-
+export default function ForgotPasswordScreen() {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [emailSent, setEmailSent] = useState(false);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    AsyncStorage.getItem(AUTH_TOKEN_KEY).then((authToken) => {
-      if (authToken) {
-        updateAuthToken(authToken);
-      }
-    });
-  }, []);
+  const handleReturn = () => {
+    router.push("/login");
+  };
 
-  const handleLogin = () => {
+  const handleForgotEmail = () => {
     if (!validateEmail(email)) {
       setError("Некорректный email");
       return;
     }
 
-    const url = process.env.EXPO_PUBLIC_API_URL + LOGIN;
+    const url = process.env.EXPO_PUBLIC_API_URL + FORGOT_PASSWORD;
     const body = {
       email: email.trim(),
-      password,
-      expoPushToken,
-      latitude: location ? location.coords.latitude : null,
-      longitude: location ? location.coords.longitude : null,
     };
     const options = {
       method: "POST",
@@ -56,7 +39,6 @@ export default function LoginScreen() {
       },
       body: JSON.stringify(body),
     };
-
     fetch(url, options)
       .then((response) => response.json())
       .then((data) => {
@@ -65,22 +47,43 @@ export default function LoginScreen() {
           setError(data.message);
           throw new Error(data.message);
         }
-        AsyncStorage.setItem(AUTH_TOKEN_KEY, data.data.token);
-        updateAuthToken(data.data.token);
+        setEmailSent(true);
       })
       .catch((error) => {
         console.error(`${options.method} ${url} error:`, error.message);
       });
   };
 
-  const handleForgotPassword = () => {
-    router.push("/forgotPassword");
-  };
+  if (emailSent) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.textContainer}>
+          <ThemedText style={{ textAlign: "center" }} type="default">
+            Мы отправили вам на почту ваш новый пароль. Используйте его для
+            входа в приложение.
+          </ThemedText>
+        </View>
 
+        <View style={styles.buttonContainer}>
+          <ThemedButton
+            type="default"
+            title="Вернуться к входу"
+            onPress={handleReturn}
+          />
+        </View>
+      </View>
+    );
+  }
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
       <View style={styles.container}>
         <View style={styles.formContainer}>
+          <View style={styles.textContainer}>
+            <ThemedText style={{ textAlign: "center" }} type="default">
+              Укажите ваш email. Мы отправим вам на почту новый пароль для входа
+              в приложение
+            </ThemedText>
+          </View>
           <View style={styles.inputContainer}>
             <ThemedTextInput
               type="active"
@@ -92,27 +95,11 @@ export default function LoginScreen() {
             />
           </View>
 
-          <View style={styles.inputContainer}>
-            <ThemedTextInput
-              type="active"
-              value={password}
-              editable={true}
-              maxLength={50}
-              onChangeText={(text) => setPassword(text)}
-              placeholder="Пароль"
-              secureTextEntry={true}
-            />
-          </View>
-
-          <View style={styles.buttonContainer}>
-            <ThemedButton type="default" title="Войти" onPress={handleLogin} />
-          </View>
-
           <View style={styles.buttonContainer}>
             <ThemedButton
-              type="clear"
-              title="Забыли пароль?"
-              onPress={handleForgotPassword}
+              type="default"
+              title="Далее"
+              onPress={handleForgotEmail}
             />
           </View>
 
@@ -143,4 +130,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   errorContainer: {},
+  textContainer: {
+    marginBottom: 10,
+  },
 });

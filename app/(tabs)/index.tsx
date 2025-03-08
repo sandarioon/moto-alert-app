@@ -16,7 +16,7 @@ export default function HomeScreen() {
   const route = useRoute();
   const params = route.params;
 
-  const { authToken } = useContext(AuthContext);
+  const { authToken, removeAuthToken } = useContext(AuthContext);
   const { location, locationErrMsg, updateLocation } =
     useContext(GeoLocationContext);
 
@@ -38,7 +38,7 @@ export default function HomeScreen() {
 
     try {
       const response = await fetch(
-        `https://moto-alert.ru${getCurrentAccident}`,
+        process.env.EXPO_PUBLIC_API_URL + `${getCurrentAccident}`,
         {
           headers: {
             Authorization: authToken,
@@ -46,7 +46,10 @@ export default function HomeScreen() {
         }
       );
       const data = await response.json();
-      if (data.error) throw new Error(JSON.stringify(data));
+      if (data.status === 401) {
+        console.log("Unauthorized");
+        removeAuthToken();
+      }
       console.log("Fetched current accident", data);
 
       setCurrentAccident(data.accident);
@@ -62,17 +65,20 @@ export default function HomeScreen() {
       try {
         updateLocation();
         setIsLoading(true);
-        const response = await fetch("https://moto-alert.ru/accidents/create", {
-          method: "POST",
-          headers: {
-            Authorization: authToken,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            longitude: location.coords.longitude,
-            latitude: location.coords.latitude,
-          }),
-        });
+        const response = await fetch(
+          process.env.EXPO_PUBLIC_API_URL + "/accidents/create",
+          {
+            method: "POST",
+            headers: {
+              Authorization: authToken,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              longitude: location.coords.longitude,
+              latitude: location.coords.latitude,
+            }),
+          }
+        );
 
         const data = await response.json();
         if (data.error) throw new Error(JSON.stringify(data));
@@ -91,12 +97,15 @@ export default function HomeScreen() {
     if (!authToken) return;
     try {
       setIsLoading(true);
-      const response = await fetch("https://moto-alert.ru/accidents/cancel", {
-        method: "POST",
-        headers: {
-          Authorization: authToken,
-        },
-      });
+      const response = await fetch(
+        process.env.EXPO_PUBLIC_API_URL + "/accidents/cancel",
+        {
+          method: "POST",
+          headers: {
+            Authorization: authToken,
+          },
+        }
+      );
 
       const data = await response.json();
       if (data.error) throw new Error(JSON.stringify(data));

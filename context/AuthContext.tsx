@@ -1,9 +1,9 @@
+import { router } from "expo-router";
 import { createContext, useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { IProvider } from "./types";
 import { AUTH_TOKEN_KEY } from "./constants";
-import { router } from "expo-router";
 
 export interface AuthContextValue {
   authToken: string;
@@ -20,8 +20,8 @@ const AuthContext = createContext<AuthContextValue>({
 const AuthProvider: IProvider = ({ children }) => {
   const [authToken, setAuthToken] = useState<string>("");
 
-  const updateAuthToken = (token: string) => {
-    setAuthToken(token);
+  const updateAuthToken = (authToken: string) => {
+    setAuthToken(authToken);
     router.push("/(tabs)");
   };
 

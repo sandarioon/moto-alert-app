@@ -17,6 +17,26 @@ export default function AuthLayout() {
           headerBackTitle: "Назад",
           headerShown: true,
         }}
+        name="login"
+      />
+      <Stack.Screen
+        options={{
+          headerTransparent: true,
+          headerBackVisible: true,
+          headerTitle: "",
+          headerBackTitle: "Назад",
+          headerShown: true,
+        }}
+        name="forgotPassword"
+      />
+      <Stack.Screen
+        options={{
+          headerTransparent: true,
+          headerBackVisible: true,
+          headerTitle: "",
+          headerBackTitle: "Назад",
+          headerShown: true,
+        }}
         name="register"
       />
       <Stack.Screen
@@ -27,7 +47,17 @@ export default function AuthLayout() {
           headerBackTitle: "Назад",
           headerShown: true,
         }}
-        name="login"
+        name="fillData"
+      />
+      <Stack.Screen
+        options={{
+          headerTransparent: true,
+          headerBackVisible: true,
+          headerTitle: "",
+          headerBackTitle: "Назад",
+          headerShown: true,
+        }}
+        name="confirmEmail"
       />
     </Stack>
   );

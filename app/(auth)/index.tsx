@@ -24,16 +24,23 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      <ThemedButton
-        type="default"
-        title="У меня уже есть аккаунт"
-        onPress={handleEnterPress}
-      />
-      <ThemedButton
-        type="default"
-        title="Зарегистрироваться"
-        onPress={handleRegisterPress}
-      />
+      <View style={styles.buttonsContainer}>
+        <View style={styles.buttonContainer}>
+          <ThemedButton
+            type="default"
+            title="У меня уже есть аккаунт"
+            onPress={handleEnterPress}
+          />
+        </View>
+
+        <View style={styles.buttonContainer}>
+          <ThemedButton
+            type="default"
+            title="Зарегистрироваться"
+            onPress={handleRegisterPress}
+          />
+        </View>
+      </View>
     </View>
   );
 }
@@ -45,5 +52,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 20,
     backgroundColor: "#fff",
+  },
+  buttonsContainer: {
+    width: "100%",
+  },
+  buttonContainer: {
+    marginBottom: 15,
   },
 });

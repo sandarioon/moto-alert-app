@@ -11,8 +11,9 @@ import { StatusBar } from "expo-status-bar";
 import * as SplashScreen from "expo-splash-screen";
 import FlashMessage from "react-native-flash-message";
 
+import { UserProvider } from "@/context/UserContext";
+import { AuthProvider } from "@/context/AuthContext";
 import { useColorScheme } from "@/hooks/useColorScheme";
-import { AuthContext, AuthProvider } from "@/context/AuthContext";
 import { GeoLocationProvider } from "@/context/GeoLocationContext";
 import { PushNotificationsProvider } from "@/context/PushNotificationsContext";
 
@@ -37,30 +38,22 @@ export default function RootLayout() {
 
   return (
     <PushNotificationsProvider>
-      <AuthProvider>
-        <ThemeProvider
-          value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
-        >
-          <GeoLocationProvider>
-            <AuthContext.Consumer>
-              {() => (
-                <Stack screenOptions={{ headerShown: false }}>
-                  <Stack.Screen
-                    name="(auth)"
-                    options={{ headerShown: false }}
-                  />
-                  <Stack.Screen
-                    name="(tabs)"
-                    options={{ headerShown: false }}
-                  />
-                  <Stack.Screen name="+not-found" />
-                </Stack>
-              )}
-            </AuthContext.Consumer>
-          </GeoLocationProvider>
-        </ThemeProvider>
-        <StatusBar style="auto" />
-      </AuthProvider>
+      <UserProvider>
+        <AuthProvider>
+          <ThemeProvider
+            value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+          >
+            <GeoLocationProvider>
+              <Stack screenOptions={{ headerShown: false }}>
+                <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                <Stack.Screen name="+not-found" />
+              </Stack>
+            </GeoLocationProvider>
+          </ThemeProvider>
+          <StatusBar style="auto" />
+        </AuthProvider>
+      </UserProvider>
       <FlashMessage position="top" />
     </PushNotificationsProvider>
   );
