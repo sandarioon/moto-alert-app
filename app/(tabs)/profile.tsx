@@ -115,6 +115,7 @@ export default function ProfileScreen() {
           throw new Error(data.message);
         } else {
           setUser(data.data);
+          setIsEditMode(false);
         }
       })
       .catch((error) => {

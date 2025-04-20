@@ -5,8 +5,9 @@ import { useState, useContext, useEffect } from "react";
 import { View, StyleSheet, ActivityIndicator } from "react-native";
 
 import { Accident } from "@/context/types";
+import { useSocket } from "@/hooks/useSocket";
+import { CURRENT_ACCIDENT } from "@/api/requests";
 import { AuthContext } from "@/context/AuthContext";
-import { getCurrentAccident } from "@/api/requests";
 import { ThemedText } from "@/components/ThemedText";
 import { PulseButton } from "@/components/PulseButton";
 import { ThemedButton } from "@/components/ThemedButton";
@@ -17,6 +18,7 @@ export default function HomeScreen() {
   const params = route.params;
 
   const { authToken, removeAuthToken } = useContext(AuthContext);
+
   const { location, locationErrMsg, updateLocation } =
     useContext(GeoLocationContext);
 
@@ -36,28 +38,27 @@ export default function HomeScreen() {
 
     setIsLoading(true);
 
-    try {
-      const response = await fetch(
-        process.env.EXPO_PUBLIC_API_URL + `${getCurrentAccident}`,
-        {
-          headers: {
-            Authorization: authToken,
-          },
-        }
-      );
-      const data = await response.json();
-      if (data.status === 401) {
-        console.log("Unauthorized");
-        removeAuthToken();
-      }
-      console.log("Fetched current accident", data);
+    const url = process.env.EXPO_PUBLIC_API_URL + CURRENT_ACCIDENT;
+    const options = {
+      method: "GET",
+      headers: {
+        Authorization: authToken,
+      },
+    };
 
-      setCurrentAccident(data.accident);
-    } catch (error) {
-      console.log("Error:", error);
-    } finally {
-      setIsLoading(false);
-    }
+    fetch(url, options)
+      .then((response) => response.json())
+      .then((data) => {
+        console.info(`${options.method} ${url} response:`, data);
+        if (data.error) {
+          removeAuthToken();
+        } else {
+          setCurrentAccident(data.data.accident);
+        }
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   };
 
   const handleCreateAccident = async () => {

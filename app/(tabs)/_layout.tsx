@@ -46,6 +46,16 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="chats"
+        initialParams={{ tabId }}
+        options={{
+          title: "Чаты",
+          tabBarIcon: ({ color }) => (
+            <FontAwesome name="book" size={24} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="map"
         initialParams={{ tabId }}
         options={{

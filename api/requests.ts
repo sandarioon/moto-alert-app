@@ -7,4 +7,8 @@ export const FORGOT_PASSWORD = "/auth/forgotPassword";
 
 export const GET_PROFILE = "/user";
 export const UPDATE_USER = "/user/update";
-export const getCurrentAccident = "/accidents/current";
+export const CURRENT_ACCIDENT = "/accidents/current";
+
+// Chat
+export const GET_CHATS = "/accidents/chats";
+export const GET_CHAT = "/accidents/chat/";
