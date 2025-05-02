@@ -8,7 +8,7 @@ export function log(method: string, url: string, data: string) {
     "\x1b[32m%s\x1b[0m",
     method + " " + url,
     "\n                 Response:",
-    data
+    `\x1b[35m${JSON.stringify(data)}\x1b[0m`
   );
 }
 
