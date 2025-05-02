@@ -16,8 +16,8 @@ import {
   USER_UPDATE_ERROR,
   USER_GET_PROFILE_ERROR,
 } from "@/api/requests";
-import { validatePhone } from "@/utils/utils";
 import { User, UserGender } from "@/context/types";
+import { log, validatePhone } from "@/utils/utils";
 import { AuthContext } from "@/context/AuthContext";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedButton } from "@/components/ThemedButton";
@@ -59,7 +59,7 @@ export default function ProfileScreen() {
     fetch(url, options)
       .then((response) => response.json())
       .then((data) => {
-        console.info(`${options.method} ${url} response:`, data);
+        log(options.method, url, data);
         if (data.status === 401) {
           removeAuthToken();
         }
@@ -115,7 +115,7 @@ export default function ProfileScreen() {
     fetch(url, options)
       .then((response) => response.json())
       .then((data) => {
-        console.info(`${options.method} ${url} response:`, data);
+        log(options.method, url, data);
         if (data.status === 401) {
           removeAuthToken();
         }

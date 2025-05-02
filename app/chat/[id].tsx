@@ -17,6 +17,7 @@ import {
   CHATS_GET_CHAT_ERROR,
   USER_GET_PROFILE_ERROR,
 } from "@/api/requests";
+import { log } from "@/utils/utils";
 import { User } from "@/context/types";
 import { useSocket } from "@/hooks/useSocket";
 import { AuthContext } from "@/context/AuthContext";
@@ -57,7 +58,7 @@ export default function ChatScreen() {
     fetch(url, options)
       .then((response) => response.json())
       .then((data) => {
-        console.info(`${options.method} ${url} response:`, data);
+        log(options.method, url, data);
         if (data.status === 401) {
           removeAuthToken();
         }
@@ -94,7 +95,7 @@ export default function ChatScreen() {
     fetch(url, options)
       .then((response) => response.json())
       .then((data) => {
-        console.info(`${options.method} ${url} response:`, data);
+        log(options.method, url, data);
         if (data.status === 401) {
           removeAuthToken();
         }

@@ -13,6 +13,7 @@ import {
   AUTH_RESEND_CODE_ERROR,
   AUTH_VERIFY_CODE_ERROR,
 } from "@/api/requests";
+import { log } from "@/utils/utils";
 import { UserContext } from "@/context/UserContext";
 import { AuthContext } from "@/context/AuthContext";
 import { ThemedText } from "@/components/ThemedText";
@@ -80,7 +81,7 @@ export default function ConfirmEmailScreen() {
     fetch(url, options)
       .then((response) => response.json())
       .then((data) => {
-        console.info(`${options.method} ${url} response:`, data);
+        log(options.method, url, data);
         if (data.error) {
           setTimerActive(true);
           setIsCodeSent(true);
@@ -123,7 +124,7 @@ export default function ConfirmEmailScreen() {
     fetch(url, options)
       .then((response) => response.json())
       .then((data) => {
-        console.info(`${options.method} ${url} response:`, data);
+        log(options.method, url, data);
         if (data.error) {
           setError(data.message);
           showMessage({

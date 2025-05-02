@@ -10,7 +10,7 @@ import { router } from "expo-router";
 import { useContext, useState } from "react";
 
 import { UserGender } from "@/context/types";
-import { validatePhone } from "@/utils/utils";
+import { log, validatePhone } from "@/utils/utils";
 import { UserContext } from "@/context/UserContext";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedButton } from "@/components/ThemedButton";
@@ -73,7 +73,7 @@ export default function FillDataScreen() {
     fetch(url, options)
       .then((response) => response.json())
       .then((data) => {
-        console.info(`${options.method} ${url} response:`, data);
+        log(options.method, url, data);
         if (data.error) {
           setError(data.message);
           showMessage({

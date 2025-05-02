@@ -12,7 +12,7 @@ import {
   AUTH_FORGOT_PASSWORD,
   AUTH_FORGOT_PASSWORD_ERROR,
 } from "@/api/requests";
-import { validateEmail } from "@/utils/utils";
+import { log, validateEmail } from "@/utils/utils";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedButton } from "@/components/ThemedButton";
 import { showMessage } from "react-native-flash-message";
@@ -51,7 +51,7 @@ export default function ForgotPasswordScreen() {
     fetch(url, options)
       .then((response) => response.json())
       .then((data) => {
-        console.info(`${options.method} ${url} response:`, data);
+        log(options.method, url, data);
         if (data.error) {
           setError(data.message);
           showMessage({

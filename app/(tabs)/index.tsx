@@ -12,6 +12,7 @@ import {
   ACCIDENTS_CREATE_ERROR,
   ACCIDENTS_GET_CURRENT_ERROR,
 } from "@/api/requests";
+import { log } from "@/utils/utils";
 import { Accident } from "@/context/types";
 import { AuthContext } from "@/context/AuthContext";
 import { ThemedText } from "@/components/ThemedText";
@@ -53,7 +54,7 @@ export default function HomeScreen() {
     fetch(url, options)
       .then((response) => response.json())
       .then((data) => {
-        console.info(`${options.method} ${url} response:`, data);
+        log(options.method, url, data);
         if (data.status === 401) {
           removeAuthToken();
         }
@@ -99,7 +100,7 @@ export default function HomeScreen() {
     fetch(url, options)
       .then((response) => response.json())
       .then((data) => {
-        console.info(`${options.method} ${url} response:`, data);
+        log(options.method, url, data);
         if (data.status === 401) {
           removeAuthToken();
         }
@@ -139,7 +140,7 @@ export default function HomeScreen() {
     fetch(url, options)
       .then((response) => response.json())
       .then((data) => {
-        console.info(`${options.method} ${url} response:`, data);
+        log(options.method, url, data);
         if (data.status === 401) {
           removeAuthToken();
         }

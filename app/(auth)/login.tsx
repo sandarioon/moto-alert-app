@@ -9,7 +9,7 @@ import { router } from "expo-router";
 import React, { useContext, useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import { validateEmail } from "@/utils/utils";
+import { log, validateEmail } from "@/utils/utils";
 import { AuthContext } from "@/context/AuthContext";
 import { ThemedText } from "@/components/ThemedText";
 import { AUTH_TOKEN_KEY } from "@/context/constants";
@@ -65,7 +65,7 @@ export default function LoginScreen() {
     fetch(url, options)
       .then((response) => response.json())
       .then((data) => {
-        console.info(`${options.method} ${url} response:`, data);
+        log(options.method, url, data);
         if (data.error) {
           setError(data.message);
           showMessage({

@@ -4,6 +4,7 @@ import { showMessage } from "react-native-flash-message";
 import React, { useContext, useEffect, useState } from "react";
 import { View, StyleSheet, ActivityIndicator, FlatList } from "react-native";
 
+import { log } from "@/utils/utils";
 import { AuthContext } from "@/context/AuthContext";
 import { ThemedText } from "@/components/ThemedText";
 import { CHATS_GET_ALL, CHATS_GET_ALL_ERROR } from "@/api/requests";
@@ -38,7 +39,7 @@ export default function ChatsScreen() {
     fetch(url, options)
       .then((response) => response.json())
       .then((data) => {
-        console.info(`${options.method} ${url} response:`, data);
+        log(options.method, url, data);
         if (data.status === 401) {
           removeAuthToken();
         }
