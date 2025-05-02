@@ -5,10 +5,9 @@ export function validatePhone(phone: string) {
 
 export function log(method: string, url: string, data: string) {
   return console.log(
-    "\x1b[32m%s\x1b[0m",
+    "\x1b[1m\x1b[32m%s\x1b[0m",
     method + " " + url,
-    "\n                 Response:",
-    `\x1b[35m${JSON.stringify(data)}\x1b[0m`
+    `\n\x1b[35m${JSON.stringify(data, null, 2)}\x1b[0m`
   );
 }
 
