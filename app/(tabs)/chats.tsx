@@ -6,13 +6,13 @@ import { View, StyleSheet, ActivityIndicator, FlatList } from "react-native";
 
 import { AuthContext } from "@/context/AuthContext";
 import { ThemedText } from "@/components/ThemedText";
-import { GET_CHATS } from "@/api/requests";
+import { CHATS_GET_ALL, CHATS_GET_ALL_ERROR } from "@/api/requests";
 
 export default function ChatsScreen() {
   const route = useRoute();
   const params = route.params;
 
-  const { authToken } = useContext(AuthContext);
+  const { authToken, removeAuthToken } = useContext(AuthContext);
   const [isLoading, setIsLoading] = useState(true);
   const [chats, setChats] = useState<{ id: number }[]>([]);
 
@@ -27,7 +27,8 @@ export default function ChatsScreen() {
 
   const fetchChats = () => {
     setIsLoading(true);
-    const url = process.env.EXPO_PUBLIC_API_URL + GET_CHATS;
+
+    const url = process.env.EXPO_PUBLIC_API_URL + CHATS_GET_ALL;
     const options = {
       method: "GET",
       headers: {
@@ -38,32 +39,18 @@ export default function ChatsScreen() {
       .then((response) => response.json())
       .then((data) => {
         console.info(`${options.method} ${url} response:`, data);
+        if (data.status === 401) {
+          removeAuthToken();
+        }
         if (data.error) {
           showMessage({
             duration: 3000,
-            message: "Не удалось загрузить чаты пользователя",
+            message: CHATS_GET_ALL_ERROR,
             type: "danger",
           });
           throw new Error(data.message);
         } else {
-          // setChats([
-          //   { id: 1 },
-          //   { id: 2 },
-          //   { id: 3 },
-          //   { id: 4 },
-          //   { id: 5 },
-          //   { id: 6 },
-          //   { id: 7 },
-          //   { id: 8 },
-          //   { id: 9 },
-          //   { id: 10 },
-          //   { id: 11 },
-          //   { id: 12 },
-          //   { id: 13 },
-          //   { id: 14 },
-          //   { id: 15 },
-          // ]);
-          setChats(data);
+          setChats(data.data);
         }
       })
       .catch((error) => {

@@ -10,12 +10,17 @@ import { useRoute } from "@react-navigation/native";
 import { showMessage } from "react-native-flash-message";
 import React, { useContext, useEffect, useState } from "react";
 
+import {
+  USER_UPDATE,
+  USER_GET_PROFILE,
+  USER_UPDATE_ERROR,
+  USER_GET_PROFILE_ERROR,
+} from "@/api/requests";
 import { validatePhone } from "@/utils/utils";
 import { User, UserGender } from "@/context/types";
 import { AuthContext } from "@/context/AuthContext";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedButton } from "@/components/ThemedButton";
-import { GET_PROFILE, UPDATE_USER } from "@/api/requests";
 import { ThemedTextInput } from "@/components/ThemedTextInput";
 
 export default function ProfileScreen() {
@@ -34,16 +39,17 @@ export default function ProfileScreen() {
 
   useEffect(() => {
     console.log("Profile Screen reloaded");
-    fetchUser();
+    handleFetchUser();
   }, [params]);
 
   useEffect(() => {
-    fetchUser();
+    handleFetchUser();
   }, []);
 
-  const fetchUser = () => {
+  const handleFetchUser = () => {
     setIsLoading(true);
-    const url = process.env.EXPO_PUBLIC_API_URL + GET_PROFILE;
+
+    const url = process.env.EXPO_PUBLIC_API_URL + USER_GET_PROFILE;
     const options = {
       method: "GET",
       headers: {
@@ -54,10 +60,13 @@ export default function ProfileScreen() {
       .then((response) => response.json())
       .then((data) => {
         console.info(`${options.method} ${url} response:`, data);
+        if (data.status === 401) {
+          removeAuthToken();
+        }
         if (data.error) {
           showMessage({
             duration: 3000,
-            message: "Не удалось загрузить данные о пользователе",
+            message: USER_GET_PROFILE_ERROR,
             type: "danger",
           });
           throw new Error(data.message);
@@ -80,19 +89,20 @@ export default function ProfileScreen() {
     setIsEditMode(!isEditMode);
   };
 
-  const updateUser = () => {
+  const handleUpdateUser = () => {
     if (!user || (!user.name && !user.phone && !user.bikeModel && !user.gender))
       return;
     if (nameInputError || phoneInputError || bikeModelInputError) return;
     if (!authToken || !user) return;
 
     setIsLoading(true);
-    const url = process.env.EXPO_PUBLIC_API_URL + UPDATE_USER;
+    const url = process.env.EXPO_PUBLIC_API_URL + USER_UPDATE;
     const body: Partial<User> = {};
     if (user.name) body.name = user.name;
     if (user.phone) body.phone = user.phone;
     if (user.bikeModel) body.bikeModel = user.bikeModel;
     if (user.gender) body.gender = user.gender;
+
     const options = {
       method: "POST",
       headers: {
@@ -106,10 +116,13 @@ export default function ProfileScreen() {
       .then((response) => response.json())
       .then((data) => {
         console.info(`${options.method} ${url} response:`, data);
+        if (data.status === 401) {
+          removeAuthToken();
+        }
         if (data.error) {
           showMessage({
             duration: 3000,
-            message: "Не удалось обновить данные пользователя",
+            message: USER_UPDATE_ERROR,
             type: "danger",
           });
           throw new Error(data.message);
@@ -246,7 +259,7 @@ export default function ProfileScreen() {
             <ThemedButton
               type="default"
               title="Сохранить"
-              onPress={updateUser}
+              onPress={handleUpdateUser}
             />
 
             <ThemedButton

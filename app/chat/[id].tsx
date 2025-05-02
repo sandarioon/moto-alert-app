@@ -11,40 +11,43 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { showMessage } from "react-native-flash-message";
 import React, { useContext, useEffect, useState } from "react";
 
+import {
+  CHATS_GET_CHAT,
+  USER_GET_PROFILE,
+  CHATS_GET_CHAT_ERROR,
+  USER_GET_PROFILE_ERROR,
+} from "@/api/requests";
 import { User } from "@/context/types";
-import { IChatMessage } from "./models";
 import { useSocket } from "@/hooks/useSocket";
-import ChatMessage from "@/components/ChatMessage";
 import { AuthContext } from "@/context/AuthContext";
-import { GET_CHAT, GET_PROFILE } from "@/api/requests";
+import ChatMessageItem from "@/components/ChatMessage";
+import { ChatMessage, InputChatMessage } from "./models";
 import { ThemedTextInput } from "@/components/ThemedTextInput";
 
 export default function ChatScreen() {
   let scrollViewRef: ScrollView | null = null;
 
   const { id } = useLocalSearchParams();
-  const { authToken } = useContext(AuthContext);
+  const { authToken, removeAuthToken } = useContext(AuthContext);
   const [user, setUser] = useState<User | null>(null);
   const { socketData, sendChatMessage, isConnected } = useSocket({ authToken });
 
   const [isLoading, setIsLoading] = useState(true);
-  const [inputMessage, setInputMessage] = useState("");
-  const [messages, setMessages] = useState<
-    { userId: number; message: string; timestamp: number }[]
-  >([]);
+  const [inputChatMessage, setInputChatMessage] = useState("");
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
 
   useEffect(() => {
-    if (socketData) setMessages([...messages, socketData]);
+    if (socketData) setChatMessages([...chatMessages, socketData]);
   }, [socketData]);
 
   useEffect(() => {
-    fetchChat(Number(id));
-    fetchUser();
+    handleFetchChat(Number(id));
+    handleFetchUser();
   }, []);
 
-  const fetchUser = () => {
+  const handleFetchUser = () => {
     setIsLoading(true);
-    const url = process.env.EXPO_PUBLIC_API_URL + GET_PROFILE;
+    const url = process.env.EXPO_PUBLIC_API_URL + USER_GET_PROFILE;
     const options = {
       method: "GET",
       headers: {
@@ -55,10 +58,13 @@ export default function ChatScreen() {
       .then((response) => response.json())
       .then((data) => {
         console.info(`${options.method} ${url} response:`, data);
+        if (data.status === 401) {
+          removeAuthToken();
+        }
         if (data.error) {
           showMessage({
             duration: 3000,
-            message: "Не удалось загрузить данные о пользователе",
+            message: USER_GET_PROFILE_ERROR,
             type: "danger",
           });
           throw new Error(data.message);
@@ -74,28 +80,33 @@ export default function ChatScreen() {
       });
   };
 
-  const fetchChat = (id: number) => {
+  const handleFetchChat = (id: number) => {
     setIsLoading(true);
-    const url = process.env.EXPO_PUBLIC_API_URL + GET_CHAT + id;
+
+    const url = process.env.EXPO_PUBLIC_API_URL + CHATS_GET_CHAT + id;
     const options = {
       method: "GET",
       headers: {
         Authorization: authToken,
       },
     };
+
     fetch(url, options)
       .then((response) => response.json())
       .then((data) => {
         console.info(`${options.method} ${url} response:`, data);
+        if (data.status === 401) {
+          removeAuthToken();
+        }
         if (data.error) {
           showMessage({
             duration: 3000,
-            message: `Не удалось загрузить чат с id ${id}`,
+            message: CHATS_GET_CHAT_ERROR,
             type: "danger",
           });
           throw new Error(data.message);
         } else {
-          setMessages(data);
+          setChatMessages(data.data);
         }
       })
       .catch((error) => {
@@ -106,23 +117,17 @@ export default function ChatScreen() {
       });
   };
 
-  const formatInputMessage = (message: string): IChatMessage => {
+  const formatInputChatMessage = (message: string): InputChatMessage => {
     return {
       chatId: Number(id),
+      userId: Number(user?.id),
       message,
     };
   };
 
   if (isLoading) {
     return (
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: "#fff",
-          justifyContent: "center",
-          padding: 20,
-        }}
-      >
+      <View style={styles.container}>
         <ActivityIndicator size="large" color="#25a9e2" />
       </View>
     );
@@ -158,16 +163,20 @@ export default function ChatScreen() {
           }
         }}
       >
-        {messages
-          .sort((a, b) => a.timestamp - b.timestamp)
-          .map((message, index) => (
-            <ChatMessage
-              key={index}
-              user={user}
-              message={message}
-              index={index}
-            />
-          ))}
+        {chatMessages.length > 0 ? (
+          chatMessages
+            .sort((a, b) => a.timestamp - b.timestamp)
+            .map((message, index) => (
+              <ChatMessageItem
+                key={index}
+                user={user}
+                message={message}
+                index={index}
+              />
+            ))
+        ) : (
+          <Text style={{ alignItems: "center" }}>Нет сообщений</Text>
+        )}
         <View style={{ height: 16 }} />
       </ScrollView>
 
@@ -190,20 +199,20 @@ export default function ChatScreen() {
         />
         <ThemedTextInput
           type={"active"}
-          value={inputMessage}
+          value={inputChatMessage}
           editable={true}
           maxLength={500}
           onChangeText={(inputMessage) => {
-            setInputMessage(inputMessage);
+            setInputChatMessage(inputMessage);
           }}
           placeholder="Введите сообщение"
           style={{ flex: 1, marginRight: 10 }}
         />
         <TouchableOpacity
           onPress={() => {
-            console.log("Send message:", inputMessage);
-            sendChatMessage(formatInputMessage(inputMessage));
-            setInputMessage("");
+            console.log("Send message:", inputChatMessage);
+            sendChatMessage(formatInputChatMessage(inputChatMessage));
+            setInputChatMessage("");
           }}
         >
           <FontAwesome
@@ -218,4 +227,12 @@ export default function ChatScreen() {
   );
 }
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+    backgroundColor: "#fff",
+  },
+});

@@ -2,21 +2,27 @@ import {
   View,
   Keyboard,
   StyleSheet,
+  ActivityIndicator,
   TouchableWithoutFeedback,
 } from "react-native";
 import { router } from "expo-router";
 import React, { useState } from "react";
 
+import {
+  AUTH_FORGOT_PASSWORD,
+  AUTH_FORGOT_PASSWORD_ERROR,
+} from "@/api/requests";
 import { validateEmail } from "@/utils/utils";
-import { FORGOT_PASSWORD } from "@/api/requests";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedButton } from "@/components/ThemedButton";
+import { showMessage } from "react-native-flash-message";
 import { ThemedTextInput } from "@/components/ThemedTextInput";
 
 export default function ForgotPasswordScreen() {
   const [email, setEmail] = useState("");
   const [emailSent, setEmailSent] = useState(false);
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
 
   const handleReturn = () => {
     router.push("/login");
@@ -28,7 +34,9 @@ export default function ForgotPasswordScreen() {
       return;
     }
 
-    const url = process.env.EXPO_PUBLIC_API_URL + FORGOT_PASSWORD;
+    setIsLoading(true);
+
+    const url = process.env.EXPO_PUBLIC_API_URL + AUTH_FORGOT_PASSWORD;
     const body = {
       email: email.trim(),
     };
@@ -39,20 +47,38 @@ export default function ForgotPasswordScreen() {
       },
       body: JSON.stringify(body),
     };
+
     fetch(url, options)
       .then((response) => response.json())
       .then((data) => {
         console.info(`${options.method} ${url} response:`, data);
         if (data.error) {
           setError(data.message);
+          showMessage({
+            duration: 3000,
+            message: AUTH_FORGOT_PASSWORD_ERROR,
+            type: "danger",
+          });
           throw new Error(data.message);
+        } else {
+          setEmailSent(true);
         }
-        setEmailSent(true);
       })
       .catch((error) => {
         console.error(`${options.method} ${url} error:`, error.message);
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
   };
+
+  if (isLoading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#25a9e2" />
+      </View>
+    );
+  }
 
   if (emailSent) {
     return (

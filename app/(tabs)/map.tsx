@@ -11,6 +11,12 @@ import { showMessage } from "react-native-flash-message";
 import MapView, { Callout, Marker } from "react-native-maps";
 import React, { useContext, useEffect, useState } from "react";
 
+import {
+  ACCIDENTS_HELP,
+  ACCIDENTS_GET_ALL,
+  ACCIDENTS_HELP_ERROR,
+  ACCIDENTS_GET_ALL_ERROR,
+} from "@/api/requests";
 import { Accident } from "@/context/types";
 import { AuthContext } from "@/context/AuthContext";
 import { ThemedText } from "@/components/ThemedText";
@@ -20,7 +26,7 @@ import { GeoLocationContext } from "@/context/GeoLocationContext";
 export default function MapScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const { location, locationErrMsg } = useContext(GeoLocationContext);
-  const { authToken } = useContext(AuthContext);
+  const { authToken, removeAuthToken } = useContext(AuthContext);
 
   const route = useRoute();
   const params = route.params;
@@ -29,66 +35,87 @@ export default function MapScreen() {
     console.log("Map Screen reloaded");
   }, [params]);
 
+  const [isLoading, setIsLoading] = useState(true);
   const [accidents, setAccidents] = useState<Accident[]>([]);
   const [selectedAccident, setSelectedAccident] = useState<Accident | null>(
     null
   );
-  const [isLoading, setIsLoading] = useState(true);
 
   const fetchAccidents = async () => {
-    if (!authToken) return;
-
     setIsLoading(true);
-    try {
-      const response = await fetch(
-        process.env.EXPO_PUBLIC_API_URL + "/accidents/",
-        {
-          headers: {
-            Authorization: authToken,
-          },
-        }
-      );
-      const data = await response.json();
-      if (data.error) throw new Error(JSON.stringify(data));
-      console.log("Fetched accidents", data);
 
-      setAccidents(data);
-    } catch (error) {
-      console.log("Error", error);
-    } finally {
-      setIsLoading(false);
-    }
+    const url = process.env.EXPO_PUBLIC_API_URL + ACCIDENTS_GET_ALL;
+    const options = {
+      method: "GET",
+      headers: {
+        Authorization: authToken,
+      },
+    };
+    fetch(url, options)
+      .then((response) => response.json())
+      .then((data) => {
+        console.info(`${options.method} ${url} response:`, data);
+        if (data.status === 401) {
+          removeAuthToken();
+        }
+        if (data.error) {
+          showMessage({
+            duration: 3000,
+            message: ACCIDENTS_GET_ALL_ERROR,
+            type: "danger",
+          });
+          throw new Error(data.message);
+        } else {
+          setAccidents(data.data);
+        }
+      })
+      .catch((error) => {
+        console.error(`${options.method} ${url} error:`, error.message);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   };
 
   const handleHelpInAccident = async (accidentId: number | undefined) => {
-    if (location && authToken && accidentId) {
-      try {
-        setIsLoading(true);
-        const response = await fetch(
-          process.env.EXPO_PUBLIC_API_URL + "/accidents/help/" + accidentId,
-          {
-            method: "POST",
-            headers: {
-              Authorization: authToken,
-              "Content-Type": "application/json",
-            },
-          }
-        );
-
-        const data = await response.json();
-        if (data.error) throw new Error(JSON.stringify(data));
-        console.log("Helped in accident", data);
-      } catch (error) {
-        console.log("Error:", error);
-        showMessage({
-          duration: 3000,
-          message: "Вы не можете отозваться на собственный запрос о помощи",
-          type: "danger",
-        });
-      } finally {
-        setIsLoading(false);
-      }
+    if (!location || !authToken || !accidentId) {
+      console.log("MISSING !location || !authToken || !accidentId");
+      return;
     }
+
+    const url = process.env.EXPO_PUBLIC_API_URL + ACCIDENTS_HELP + accidentId;
+    const options = {
+      method: "POST",
+      headers: {
+        Authorization: authToken,
+        "Content-Type": "application/json",
+      },
+    };
+
+    fetch(url, options)
+      .then((response) => response.json())
+      .then((data) => {
+        console.info(`${options.method} ${url} response:`, data);
+        if (data.status === 401) {
+          removeAuthToken();
+        }
+        if (data.error) {
+          showMessage({
+            duration: 3000,
+            message: ACCIDENTS_HELP_ERROR,
+            type: "danger",
+          });
+          throw new Error(data.message);
+        } else {
+          setAccidents(data.data);
+        }
+      })
+      .catch((error) => {
+        console.error(`${options.method} ${url} error:`, error.message);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   };
 
   useFocusEffect(
@@ -119,8 +146,6 @@ export default function MapScreen() {
       </View>
     );
   }
-
-  console.log("selectedAccident", selectedAccident);
 
   return (
     <View style={styles.container}>

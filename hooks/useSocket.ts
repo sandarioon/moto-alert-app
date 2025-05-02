@@ -2,7 +2,7 @@ import io, { Socket } from "socket.io-client";
 import { useEffect, useRef, useState } from "react";
 
 import { SocketIoEvents } from "@/utils/types";
-import { IChatMessage } from "@/app/chat/models";
+import { InputChatMessage } from "@/app/chat/models";
 
 export const useSocket = ({ authToken }: { authToken: string }) => {
   const [socketData, setSocketData] = useState<any>({});
@@ -52,13 +52,7 @@ export const useSocket = ({ authToken }: { authToken: string }) => {
     };
   }, [authToken]);
 
-  const sendMessage = (message: string) => {
-    if (!socket.current) return;
-
-    socket.current.emit(SocketIoEvents.CHAT, message);
-  };
-
-  const sendChatMessage = (chatMessage: IChatMessage) => {
+  const sendChatMessage = (chatMessage: InputChatMessage) => {
     if (!socket.current) return;
 
     socket.current.emit(SocketIoEvents.CHAT, JSON.stringify(chatMessage));
@@ -66,7 +60,6 @@ export const useSocket = ({ authToken }: { authToken: string }) => {
 
   return {
     socketData,
-    sendMessage,
     sendChatMessage,
     isConnected,
   };

@@ -2,18 +2,20 @@ import {
   View,
   Keyboard,
   StyleSheet,
+  ActivityIndicator,
   TouchableWithoutFeedback,
 } from "react-native";
 import { router } from "expo-router";
 import React, { useContext, useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import { LOGIN } from "@/api/requests";
 import { validateEmail } from "@/utils/utils";
 import { AuthContext } from "@/context/AuthContext";
 import { ThemedText } from "@/components/ThemedText";
 import { AUTH_TOKEN_KEY } from "@/context/constants";
+import { showMessage } from "react-native-flash-message";
 import { ThemedButton } from "@/components/ThemedButton";
+import { AUTH_LOGIN, AUTH_LOGIN_ERROR } from "@/api/requests";
 import { ThemedTextInput } from "@/components/ThemedTextInput";
 import { GeoLocationContext } from "@/context/GeoLocationContext";
 import { PushNotificationsContext } from "@/context/PushNotificationsContext";
@@ -26,6 +28,7 @@ export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     AsyncStorage.getItem(AUTH_TOKEN_KEY).then((authToken) => {
@@ -41,7 +44,9 @@ export default function LoginScreen() {
       return;
     }
 
-    const url = process.env.EXPO_PUBLIC_API_URL + LOGIN;
+    setIsLoading(true);
+
+    const url = process.env.EXPO_PUBLIC_API_URL + AUTH_LOGIN;
     const body = {
       email: email.trim(),
       password,
@@ -63,19 +68,36 @@ export default function LoginScreen() {
         console.info(`${options.method} ${url} response:`, data);
         if (data.error) {
           setError(data.message);
+          showMessage({
+            duration: 3000,
+            message: AUTH_LOGIN_ERROR,
+            type: "danger",
+          });
           throw new Error(data.message);
+        } else {
+          AsyncStorage.setItem(AUTH_TOKEN_KEY, data.data.token);
+          updateAuthToken(data.data.token);
         }
-        AsyncStorage.setItem(AUTH_TOKEN_KEY, data.data.token);
-        updateAuthToken(data.data.token);
       })
       .catch((error) => {
         console.error(`${options.method} ${url} error:`, error.message);
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
   };
 
   const handleForgotPassword = () => {
     router.push("/forgotPassword");
   };
+
+  if (isLoading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#25a9e2" />
+      </View>
+    );
+  }
 
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>

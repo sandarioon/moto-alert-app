@@ -2,16 +2,23 @@ import {
   View,
   Keyboard,
   StyleSheet,
+  ActivityIndicator,
   TouchableWithoutFeedback,
 } from "react-native";
 import { useContext, useEffect, useState } from "react";
 
+import {
+  AUTH_RESEND_CODE,
+  AUTH_VERIFY_CODE,
+  AUTH_RESEND_CODE_ERROR,
+  AUTH_VERIFY_CODE_ERROR,
+} from "@/api/requests";
 import { UserContext } from "@/context/UserContext";
 import { AuthContext } from "@/context/AuthContext";
 import { ThemedText } from "@/components/ThemedText";
 import { AUTH_TOKEN_KEY } from "@/context/constants";
+import { showMessage } from "react-native-flash-message";
 import { ThemedButton } from "@/components/ThemedButton";
-import { RESEND_CODE, VERIFY_CODE } from "@/api/requests";
 import { ThemedTextInput } from "@/components/ThemedTextInput";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -24,6 +31,7 @@ export default function ConfirmEmailScreen() {
   const [seconds, setSeconds] = useState(11);
   const [timerActive, setTimerActive] = useState(false);
   const [isCodeSent, setIsCodeSent] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -54,7 +62,9 @@ export default function ConfirmEmailScreen() {
       return;
     }
 
-    const url = process.env.EXPO_PUBLIC_API_URL + VERIFY_CODE;
+    setIsLoading(true);
+
+    const url = process.env.EXPO_PUBLIC_API_URL + AUTH_VERIFY_CODE;
     const body = {
       email: user.email?.trim(),
       code,
@@ -77,6 +87,11 @@ export default function ConfirmEmailScreen() {
           setMinutes(1);
           setSeconds(0);
           setError(data.message);
+          showMessage({
+            duration: 3000,
+            message: AUTH_VERIFY_CODE_ERROR,
+            type: "danger",
+          });
           throw new Error(data.message);
         } else {
           AsyncStorage.setItem(AUTH_TOKEN_KEY, data.data.token);
@@ -85,11 +100,15 @@ export default function ConfirmEmailScreen() {
       })
       .catch((error) => {
         console.error(`${options.method} ${url} error:`, error.message);
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
   };
 
   const handleResendCode = () => {
-    const url = process.env.EXPO_PUBLIC_API_URL + RESEND_CODE;
+    setIsLoading(true);
+    const url = process.env.EXPO_PUBLIC_API_URL + AUTH_RESEND_CODE;
     const body = {
       email: user.email?.trim(),
     };
@@ -107,17 +126,34 @@ export default function ConfirmEmailScreen() {
         console.info(`${options.method} ${url} response:`, data);
         if (data.error) {
           setError(data.message);
+          showMessage({
+            duration: 3000,
+            message: AUTH_RESEND_CODE_ERROR,
+            type: "danger",
+          });
           throw new Error(data.message);
+        } else {
+          setMinutes(1);
+          setSeconds(0);
+          setTimerActive(true);
+          setIsCodeSent(true);
         }
-        setMinutes(1);
-        setSeconds(0);
-        setTimerActive(true);
-        setIsCodeSent(true);
       })
       .catch((error) => {
         console.error(`${options.method} ${url} error:`, error.message);
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
   };
+
+  if (isLoading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#25a9e2" />
+      </View>
+    );
+  }
 
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>

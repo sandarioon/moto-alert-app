@@ -4,12 +4,19 @@ import { useRoute } from "@react-navigation/native";
 import { useState, useContext, useEffect } from "react";
 import { View, StyleSheet, ActivityIndicator } from "react-native";
 
+import {
+  ACCIDENTS_CANCEL,
+  ACCIDENTS_CREATE,
+  ACCIDENTS_GET_CURRENT,
+  ACCIDENTS_CANCEL_ERROR,
+  ACCIDENTS_CREATE_ERROR,
+  ACCIDENTS_GET_CURRENT_ERROR,
+} from "@/api/requests";
 import { Accident } from "@/context/types";
-import { useSocket } from "@/hooks/useSocket";
-import { CURRENT_ACCIDENT } from "@/api/requests";
 import { AuthContext } from "@/context/AuthContext";
 import { ThemedText } from "@/components/ThemedText";
 import { PulseButton } from "@/components/PulseButton";
+import { showMessage } from "react-native-flash-message";
 import { ThemedButton } from "@/components/ThemedButton";
 import { GeoLocationContext } from "@/context/GeoLocationContext";
 
@@ -33,28 +40,36 @@ export default function HomeScreen() {
     fetchCurrentAccident();
   }, []);
 
-  const fetchCurrentAccident = async () => {
-    if (!authToken) return;
-
+  const fetchCurrentAccident = () => {
     setIsLoading(true);
 
-    const url = process.env.EXPO_PUBLIC_API_URL + CURRENT_ACCIDENT;
+    const url = process.env.EXPO_PUBLIC_API_URL + ACCIDENTS_GET_CURRENT;
     const options = {
       method: "GET",
       headers: {
         Authorization: authToken,
       },
     };
-
     fetch(url, options)
       .then((response) => response.json())
       .then((data) => {
         console.info(`${options.method} ${url} response:`, data);
-        if (data.error) {
+        if (data.status === 401) {
           removeAuthToken();
-        } else {
-          setCurrentAccident(data.data.accident);
         }
+        if (data.error) {
+          showMessage({
+            duration: 3000,
+            message: ACCIDENTS_GET_CURRENT_ERROR,
+            type: "danger",
+          });
+          throw new Error(data.message);
+        } else {
+          setCurrentAccident(data.accident);
+        }
+      })
+      .catch((error) => {
+        console.error(`${options.method} ${url} error:`, error.message);
       })
       .finally(() => {
         setIsLoading(false);
@@ -62,62 +77,89 @@ export default function HomeScreen() {
   };
 
   const handleCreateAccident = async () => {
-    if (location && authToken) {
-      try {
-        updateLocation();
-        setIsLoading(true);
-        const response = await fetch(
-          process.env.EXPO_PUBLIC_API_URL + "/accidents/create",
-          {
-            method: "POST",
-            headers: {
-              Authorization: authToken,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              longitude: location.coords.longitude,
-              latitude: location.coords.latitude,
-            }),
-          }
-        );
+    if (!location) return;
 
-        const data = await response.json();
-        if (data.error) throw new Error(JSON.stringify(data));
-        console.log("Created accident", data);
+    updateLocation();
+    setIsLoading(true);
 
-        setCurrentAccident(data);
-      } catch (error) {
-        console.log("Error:", error);
-      } finally {
+    const url = process.env.EXPO_PUBLIC_API_URL + ACCIDENTS_CREATE;
+    const body = {
+      longitude: location.coords.longitude,
+      latitude: location.coords.latitude,
+    };
+    const options = {
+      method: "POST",
+      headers: {
+        Authorization: authToken,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    };
+
+    fetch(url, options)
+      .then((response) => response.json())
+      .then((data) => {
+        console.info(`${options.method} ${url} response:`, data);
+        if (data.status === 401) {
+          removeAuthToken();
+        }
+        if (data.error) {
+          showMessage({
+            duration: 3000,
+            message: ACCIDENTS_CREATE_ERROR,
+            type: "danger",
+          });
+          throw new Error(data.message);
+        } else {
+          setCurrentAccident(data);
+        }
+      })
+      .catch((error) => {
+        console.error(`${options.method} ${url} error:`, error.message);
+      })
+      .finally(() => {
         setIsLoading(false);
-      }
-    }
+      });
   };
 
   const handleCancelAccident = async () => {
     if (!authToken) return;
-    try {
-      setIsLoading(true);
-      const response = await fetch(
-        process.env.EXPO_PUBLIC_API_URL + "/accidents/cancel",
-        {
-          method: "POST",
-          headers: {
-            Authorization: authToken,
-          },
+
+    setIsLoading(true);
+
+    const url = process.env.EXPO_PUBLIC_API_URL + ACCIDENTS_CANCEL;
+    const options = {
+      method: "POST",
+      headers: {
+        Authorization: authToken,
+        "Content-Type": "application/json",
+      },
+    };
+
+    fetch(url, options)
+      .then((response) => response.json())
+      .then((data) => {
+        console.info(`${options.method} ${url} response:`, data);
+        if (data.status === 401) {
+          removeAuthToken();
         }
-      );
-
-      const data = await response.json();
-      if (data.error) throw new Error(JSON.stringify(data));
-      console.log("Canceled accident", data);
-
-      setCurrentAccident(null);
-    } catch (error) {
-      console.log("Error:", error);
-    } finally {
-      setIsLoading(false);
-    }
+        if (data.error) {
+          showMessage({
+            duration: 3000,
+            message: ACCIDENTS_CANCEL_ERROR,
+            type: "danger",
+          });
+          throw new Error(data.message);
+        } else {
+          setCurrentAccident(null);
+        }
+      })
+      .catch((error) => {
+        console.error(`${options.method} ${url} error:`, error.message);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   };
 
   if (isLoading) {

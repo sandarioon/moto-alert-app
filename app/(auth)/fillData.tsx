@@ -2,19 +2,21 @@ import {
   View,
   Keyboard,
   StyleSheet,
+  ActivityIndicator,
   TouchableWithoutFeedback,
 } from "react-native";
 import Checkbox from "expo-checkbox";
 import { router } from "expo-router";
 import { useContext, useState } from "react";
 
-import { CREATE } from "@/api/requests";
 import { UserGender } from "@/context/types";
 import { validatePhone } from "@/utils/utils";
 import { UserContext } from "@/context/UserContext";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedButton } from "@/components/ThemedButton";
+import { showMessage } from "react-native-flash-message";
 import { ThemedTextInput } from "@/components/ThemedTextInput";
+import { AUTH_CREATE, AUTH_CREATE_ERROR } from "@/api/requests";
 import { GeoLocationContext } from "@/context/GeoLocationContext";
 import { PushNotificationsContext } from "@/context/PushNotificationsContext";
 
@@ -30,8 +32,9 @@ export default function FillDataScreen() {
   const { expoPushToken } = useContext(PushNotificationsContext);
   const { location } = useContext(GeoLocationContext);
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
 
-  const handlePress = () => {
+  const handleSetUserData = () => {
     if (name.length < 2) {
       setNameInputError("Имя должно содержать не менее двух символов");
       return;
@@ -45,8 +48,9 @@ export default function FillDataScreen() {
       return;
     }
     updateUser({ name, gender, phone, bikeModel });
+    setIsLoading(true);
 
-    const url = process.env.EXPO_PUBLIC_API_URL + CREATE;
+    const url = process.env.EXPO_PUBLIC_API_URL + AUTH_CREATE;
     const body = {
       email: user.email?.trim(),
       password: user.password,
@@ -72,6 +76,11 @@ export default function FillDataScreen() {
         console.info(`${options.method} ${url} response:`, data);
         if (data.error) {
           setError(data.message);
+          showMessage({
+            duration: 3000,
+            message: AUTH_CREATE_ERROR,
+            type: "danger",
+          });
           throw new Error(data.message);
         } else {
           router.push("/confirmEmail");
@@ -79,8 +88,19 @@ export default function FillDataScreen() {
       })
       .catch((error) => {
         console.error(`${options.method} ${url} error:`, error.message);
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
   };
+
+  if (isLoading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#25a9e2" />
+      </View>
+    );
+  }
 
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
@@ -186,7 +206,11 @@ export default function FillDataScreen() {
           )}
 
           <View style={styles.buttonContainer}>
-            <ThemedButton type="default" title="Далее" onPress={handlePress} />
+            <ThemedButton
+              type="default"
+              title="Далее"
+              onPress={handleSetUserData}
+            />
           </View>
           <View>
             <ThemedText type="error">{error}</ThemedText>
