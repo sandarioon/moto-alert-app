@@ -138,6 +138,7 @@ export default function ChatScreen() {
     <View
       style={{
         flex: 1,
+        backgroundColor: "#fff",
       }}
     >
       <View
@@ -187,6 +188,7 @@ export default function ChatScreen() {
           justifyContent: "space-between",
           alignItems: "center",
           margin: 10,
+          marginBottom: 20,
         }}
       >
         <View

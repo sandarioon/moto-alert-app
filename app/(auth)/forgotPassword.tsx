@@ -22,7 +22,7 @@ export default function ForgotPasswordScreen() {
   const [email, setEmail] = useState("");
   const [emailSent, setEmailSent] = useState(false);
   const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleReturn = () => {
     router.push("/login");
