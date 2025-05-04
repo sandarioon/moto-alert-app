@@ -32,7 +32,7 @@ export default function ConfirmEmailScreen() {
   const [seconds, setSeconds] = useState(11);
   const [timerActive, setTimerActive] = useState(false);
   const [isCodeSent, setIsCodeSent] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => {

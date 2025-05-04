@@ -32,7 +32,7 @@ export default function FillDataScreen() {
   const { expoPushToken } = useContext(PushNotificationsContext);
   const { location } = useContext(GeoLocationContext);
   const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSetUserData = () => {
     if (name.length < 2) {
