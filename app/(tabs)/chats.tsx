@@ -72,6 +72,7 @@ export default function ChatsScreen() {
 
   return (
     <View style={styles.container}>
+      <View style={{ height: 50 }} />
       {chats.length > 0 ? (
         <FlatList
           data={chats}
@@ -83,9 +84,8 @@ export default function ChatsScreen() {
               }}
             >
               <View style={styles.chatItem}>
-                <ThemedText type="title">{item.id}</ThemedText>
-                <ThemedText type="title">Название</ThemedText>
-                <ThemedText type="default">Последнее сообщение</ThemedText>
+                <ThemedText type="title">Chat id: {item.id}</ThemedText>
+                <ThemedText type="default"> Последнее сообщение</ThemedText>
               </View>
             </Link>
           )}
@@ -107,6 +107,7 @@ const styles = StyleSheet.create({
   },
   chatItem: {
     padding: 16,
+    width: "100%",
     borderBottomWidth: 1,
     borderBottomColor: "#ccc",
     flexDirection: "row",

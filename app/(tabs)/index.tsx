@@ -187,7 +187,7 @@ export default function HomeScreen() {
           onPress={handleCreateAccident}
         />
       )}
-      <View>
+      <View style={{ marginTop: 30 }}>
         <ThemedButton
           type="default"
           title="Позвонить 112"

@@ -1,10 +1,13 @@
 import {
   View,
   Text,
+  Platform,
+  TextInput,
   StyleSheet,
   ScrollView,
-  TouchableOpacity,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  TouchableWithoutFeedback,
 } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
@@ -23,7 +26,6 @@ import { useSocket } from "@/hooks/useSocket";
 import { AuthContext } from "@/context/AuthContext";
 import ChatMessageItem from "@/components/ChatMessage";
 import { ChatMessage, InputChatMessage } from "./models";
-import { ThemedTextInput } from "@/components/ThemedTextInput";
 
 export default function ChatScreen() {
   let scrollViewRef: ScrollView | null = null;
@@ -128,35 +130,24 @@ export default function ChatScreen() {
 
   if (isLoading) {
     return (
-      <View style={styles.container}>
+      <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#25a9e2" />
       </View>
     );
   }
 
   return (
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: "#fff",
-      }}
+    // <View style={styles.container}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={styles.container}
     >
-      <View
-        style={{
-          marginTop: 60,
-          flexDirection: "row",
-          justifyContent: "center",
-        }}
-      >
-        <Text style={{ alignItems: "center" }}>Чат id: {id}</Text>
+      <View style={styles.chatIdContainer}>
+        <Text style={styles.chatIdText}>Чат id: {id}</Text>
       </View>
 
       <ScrollView
-        automaticallyAdjustKeyboardInsets={true}
-        style={{
-          flex: 1,
-          padding: 16,
-        }}
+        style={styles.chatArea}
         ref={(ref) => {
           scrollViewRef = ref;
         }}
@@ -180,39 +171,26 @@ export default function ChatScreen() {
         ) : (
           <Text style={{ alignItems: "center" }}>Нет сообщений</Text>
         )}
-        <View style={{ height: 16 }} />
       </ScrollView>
-
-      <View
-        style={{
-          flexDirection: "row",
-          justifyContent: "space-between",
-          alignItems: "center",
-          margin: 10,
-          marginBottom: 20,
-        }}
-      >
-        <View
-          style={{
-            width: 10,
-            height: 10,
-            borderRadius: 5,
-            backgroundColor: isConnected ? "#34C759" : "#FF3B30",
-            marginRight: 10,
-          }}
-        />
-        <ThemedTextInput
-          type={"active"}
+      <View style={styles.inputContainer}>
+        <View style={isConnected ? styles.online : styles.offline} />
+        <TextInput
           value={inputChatMessage}
           editable={true}
           maxLength={500}
+          onFocus={() => {
+            if (scrollViewRef) {
+              scrollViewRef.scrollToEnd({ animated: true });
+            }
+          }}
           onChangeText={(inputMessage) => {
             setInputChatMessage(inputMessage);
           }}
           placeholder="Введите сообщение"
-          style={{ flex: 1, marginRight: 10 }}
+          placeholderTextColor="#ccc"
+          style={styles.input}
         />
-        <TouchableOpacity
+        <TouchableWithoutFeedback
           onPress={() => {
             console.log("Send message:", inputChatMessage);
             sendChatMessage(formatInputChatMessage(inputChatMessage));
@@ -221,22 +199,71 @@ export default function ChatScreen() {
         >
           <FontAwesome
             name="send"
-            style={{ marginRight: 10 }}
+            style={styles.sendButton}
             size={24}
             color={"#25a9e2"}
           />
-        </TouchableOpacity>
+        </TouchableWithoutFeedback>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
     backgroundColor: "#fff",
   },
+  container: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: "#fff",
+  },
+  chatIdContainer: {
+    marginTop: 50,
+    flexDirection: "row",
+    justifyContent: "center",
+    backgroundColor: "#fff",
+  },
+  chatIdText: {
+    alignItems: "center",
+  },
+  chatArea: {
+    flex: 1,
+  },
+  online: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: "#34C759",
+    marginRight: 10,
+  },
+  offline: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: "#FF3B30",
+    marginRight: 10,
+  },
+  inputContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    margin: 10,
+    marginBottom: 20,
+  },
+  input: {
+    flex: 1,
+    marginRight: 10,
+    borderRadius: 10,
+    backgroundColor: "#ffffff",
+    borderWidth: 1,
+    borderColor: "#959595",
+    padding: 15,
+    paddingLeft: 20,
+  },
+  sendButton: {},
 });
