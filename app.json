@@ -15,6 +15,9 @@
       }
     },
     "ios": {
+      "entitlements": {
+        "aps-environment": "development"
+      },
       "config": {
         "usesNonExemptEncryption": false
       },
