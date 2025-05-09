@@ -164,7 +164,7 @@ export default function ConfirmEmailScreen() {
             <ThemedText style={{ textAlign: "center" }} type="default">
               Для завершения регистрации введите код подтверждения, который мы
               отправили на ваш email. Если письмо не приходит, проверьте папку
-              "Спам"
+              &quot;Спам&quot;
             </ThemedText>
           </View>
 

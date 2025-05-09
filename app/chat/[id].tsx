@@ -152,6 +152,7 @@ export default function ChatScreen() {
       </View>
 
       <ScrollView
+        automaticallyAdjustKeyboardInsets={true}
         style={{
           flex: 1,
           padding: 16,
