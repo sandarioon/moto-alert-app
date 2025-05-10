@@ -5,6 +5,8 @@ import {
   ActivityIndicator,
   TouchableWithoutFeedback,
 } from "react-native";
+import { router } from "expo-router";
+import { Checkbox } from "expo-checkbox";
 import { useContext, useEffect, useState } from "react";
 
 import {
@@ -33,6 +35,7 @@ export default function ConfirmEmailScreen() {
   const [timerActive, setTimerActive] = useState(false);
   const [isCodeSent, setIsCodeSent] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [policyAccepted, setPolicyAccepted] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -148,6 +151,10 @@ export default function ConfirmEmailScreen() {
       });
   };
 
+  const handlePolicyClick = () => {
+    router.push("/policy");
+  };
+
   if (isLoading) {
     return (
       <View style={styles.container}>
@@ -184,10 +191,25 @@ export default function ConfirmEmailScreen() {
 
           <View style={styles.buttonContainer}>
             <ThemedButton
-              type={timerActive ? "inactive" : "default"}
-              title="Готово"
+              type={
+                !timerActive && code.length === 6 && policyAccepted
+                  ? "default"
+                  : "inactive"
+              }
+              title="Завершить регистрацию"
               onPress={handleVerifyCode}
             />
+            <View style={{ flexDirection: "row", marginTop: 20 }}>
+              <Checkbox
+                style={{ marginRight: 10 }}
+                disabled={false}
+                value={policyAccepted}
+                onValueChange={() => setPolicyAccepted(!policyAccepted)}
+              />
+              <ThemedText type="link" onPress={handlePolicyClick}>
+                Я ознакомлен и согласен и Политикой конфиденциальности
+              </ThemedText>
+            </View>
           </View>
 
           <View style={styles.errorContainer}>

@@ -1,5 +1,5 @@
 export function validatePhone(phone: string) {
-  const regex = /^\+7\d{10}$/;
+  const regex = /^8\d{10}$/;
   return regex.test(phone);
 }
 

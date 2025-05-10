@@ -213,7 +213,7 @@ export default function ProfileScreen() {
           type={isEditMode ? "active" : "inactive"}
           value={user.phone}
           editable={isEditMode}
-          maxLength={12}
+          maxLength={11}
           onChangeText={(phone) => {
             setUser({ ...user, phone: phone });
             if (validatePhone(phone)) {
@@ -222,7 +222,7 @@ export default function ProfileScreen() {
               setPhoneInputError("Укажите номер телефона");
             }
           }}
-          placeholder="8XXXXXXXXXX"
+          placeholder="89001122555"
           keyboardType="phone-pad"
         />
         {phoneInputError && (

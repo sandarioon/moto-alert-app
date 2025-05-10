@@ -57,6 +57,16 @@ export default function AuthLayout() {
           headerBackTitle: "Назад",
           headerShown: true,
         }}
+        name="policy"
+      />
+      <Stack.Screen
+        options={{
+          headerTransparent: true,
+          headerBackVisible: true,
+          headerTitle: "",
+          headerBackTitle: "Назад",
+          headerShown: true,
+        }}
         name="confirmEmail"
       />
     </Stack>

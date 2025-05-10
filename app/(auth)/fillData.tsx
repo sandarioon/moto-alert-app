@@ -5,8 +5,8 @@ import {
   ActivityIndicator,
   TouchableWithoutFeedback,
 } from "react-native";
-import Checkbox from "expo-checkbox";
 import { router } from "expo-router";
+import { Checkbox } from "expo-checkbox";
 import { useContext, useState } from "react";
 
 import { UserGender } from "@/context/types";
@@ -163,16 +163,16 @@ export default function FillDataScreen() {
             type="active"
             value={phone}
             editable={true}
-            maxLength={12}
+            maxLength={11}
             onChangeText={(text) => {
               setPhone(text);
               if (!validatePhone(text)) {
-                setPhoneInputError("Формат номера: +79001234567");
+                setPhoneInputError("Формат номера: 89001234567");
               } else {
                 setPhoneInputError("");
               }
             }}
-            placeholder="+79001234567"
+            placeholder="89001234567"
             keyboardType="phone-pad"
           />
           {phoneInputError && (
