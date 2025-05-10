@@ -20,12 +20,19 @@ export const AUTH_FORGOT_PASSWORD_ERROR =
 export const USER_GET_PROFILE = "/user";
 export const USER_GET_PROFILE_ERROR = "Не удалось получить данные пользователя";
 
+export const USER_GET_PROFILE_BY_ID = "/user/";
+export const USER_GET_PROFILE_BY_ID_ERROR =
+  "Не удалось получить данные выбранного пользователя";
+
 export const USER_UPDATE = "/user/update";
 export const USER_UPDATE_ERROR = "Не удалось обновить данные пользователя";
 
 // Accidents
 export const ACCIDENTS_GET_ALL = "/accidents/";
 export const ACCIDENTS_GET_ALL_ERROR = "Не удалось получить список ДТП";
+
+export const ACCIDENTS_GET_BY_ID = "/accidents/byId/";
+export const ACCIDENTS_GET_BY_ID_ERROR = "Не удалось получить выбранное ДТП";
 
 export const ACCIDENTS_GET_CURRENT = "/accidents/current";
 export const ACCIDENTS_GET_CURRENT_ERROR =

@@ -1,4 +1,4 @@
-import { View, Text } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 
 import { User } from "@/context/types";
 import ChatMessageAvatar from "./ChatMessageAvatar";
@@ -20,30 +20,20 @@ export default function ChatMessageItem({
   return (
     <View
       key={index}
-      style={[
-        {
-          borderRadius: 16,
-          paddingVertical: 5,
-          flexDirection: "row",
-          alignSelf: message.userId === user?.id ? "flex-end" : "flex-start",
-        },
-      ]}
+      style={
+        message.userId === user?.id
+          ? styles.messageContainerRight
+          : styles.messageContainerLeft
+      }
     >
       {isMyMessage ? (
         <View style={{ flexDirection: "row" }}>
           <Text
-            style={[
-              {
-                paddingVertical: 8,
-                paddingHorizontal: 16,
-                borderRadius: 16,
-                backgroundColor:
-                  message.userId === user.id ? "#25a9e2" : "#25a111",
-              },
-              {
-                color: "#fff",
-              },
-            ]}
+            style={
+              message.userId === user.id
+                ? styles.bubbleTextMyUser
+                : styles.bubbleTextOtherUser
+            }
           >
             {message.message}
           </Text>
@@ -61,18 +51,11 @@ export default function ChatMessageItem({
             isMyMessage={isMyMessage}
           />
           <Text
-            style={[
-              {
-                paddingVertical: 8,
-                paddingHorizontal: 16,
-                borderRadius: 16,
-                backgroundColor:
-                  message.userId === user.id ? "#25a9e2" : "#25a111",
-              },
-              {
-                color: "#fff",
-              },
-            ]}
+            style={
+              message.userId === user.id
+                ? styles.bubbleTextMyUser
+                : styles.bubbleTextOtherUser
+            }
           >
             {message.message}
           </Text>
@@ -81,3 +64,33 @@ export default function ChatMessageItem({
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  messageContainerLeft: {
+    borderRadius: 16,
+    paddingVertical: 5,
+    flexDirection: "row",
+    alignSelf: "flex-start",
+  },
+  messageContainerRight: {
+    borderRadius: 16,
+    paddingVertical: 5,
+    flexDirection: "row",
+    alignSelf: "flex-end",
+  },
+  bubbleTextMyUser: {
+    color: "#fff",
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 16,
+    marginRight: 5,
+    backgroundColor: "#25a9e2",
+  },
+  bubbleTextOtherUser: {
+    color: "#fff",
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 16,
+    backgroundColor: "#25a111",
+  },
+});

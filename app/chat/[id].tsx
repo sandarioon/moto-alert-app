@@ -9,7 +9,7 @@ import {
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
 } from "react-native";
-import { useLocalSearchParams } from "expo-router";
+import { Link, useLocalSearchParams } from "expo-router";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { showMessage } from "react-native-flash-message";
 import React, { useContext, useEffect, useState } from "react";
@@ -137,13 +137,26 @@ export default function ChatScreen() {
   }
 
   return (
-    // <View style={styles.container}>
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.container}
     >
       <View style={styles.chatIdContainer}>
         <Text style={styles.chatIdText}>Чат id: {id}</Text>
+
+        <Link
+          href={{
+            pathname: "/accident/[id]",
+            params: { id: String(id) },
+          }}
+        >
+          <FontAwesome
+            name="info-circle"
+            style={styles.infoButton}
+            size={44}
+            color={"#25a9e2"}
+          />
+        </Link>
       </View>
 
       <ScrollView
@@ -225,11 +238,12 @@ const styles = StyleSheet.create({
   chatIdContainer: {
     marginTop: 50,
     flexDirection: "row",
-    justifyContent: "center",
     backgroundColor: "#fff",
+    justifyContent: "space-between",
   },
   chatIdText: {
     alignItems: "center",
+    marginLeft: 150,
   },
   chatArea: {
     flex: 1,
@@ -266,4 +280,5 @@ const styles = StyleSheet.create({
     paddingLeft: 20,
   },
   sendButton: {},
+  infoButton: {},
 });

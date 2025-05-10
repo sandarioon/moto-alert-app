@@ -57,6 +57,26 @@ export default function RootLayout() {
                     headerShown: true,
                   }}
                 />
+                <Stack.Screen
+                  name="user/[id]"
+                  options={{
+                    headerTransparent: true,
+                    headerBackVisible: true,
+                    headerTitle: "",
+                    headerBackTitle: "Назад",
+                    headerShown: true,
+                  }}
+                />
+                <Stack.Screen
+                  name="accident/[id]"
+                  options={{
+                    headerTransparent: true,
+                    headerBackVisible: true,
+                    headerTitle: "",
+                    headerBackTitle: "Назад",
+                    headerShown: true,
+                  }}
+                />
                 <Stack.Screen name="+not-found" />
               </Stack>
             </GeoLocationProvider>

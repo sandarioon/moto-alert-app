@@ -1,3 +1,4 @@
+import { Link } from "expo-router";
 import { View, Text } from "react-native";
 
 export default function ChatMessageAvatar({
@@ -19,21 +20,28 @@ export default function ChatMessageAvatar({
   };
 
   return (
-    <View
-      style={{
-        width: 30,
-        height: 30,
-        borderRadius: 15,
-        backgroundColor: getRandomColor(userId),
-        justifyContent: "center",
-        alignItems: "center",
-        marginRight: isMyMessage ? 0 : 5,
-        marginLeft: isMyMessage ? 5 : 0,
+    <Link
+      href={{
+        pathname: "/user/[id]",
+        params: { id: userId },
       }}
     >
-      <Text style={{ fontSize: 14, color: "#fff" }}>
-        {name.charAt(0).toUpperCase()}
-      </Text>
-    </View>
+      <View
+        style={{
+          width: 30,
+          height: 30,
+          borderRadius: 15,
+          backgroundColor: getRandomColor(userId),
+          justifyContent: "center",
+          alignItems: "center",
+          marginRight: isMyMessage ? 0 : 5,
+          marginLeft: isMyMessage ? 5 : 0,
+        }}
+      >
+        <Text style={{ fontSize: 14, color: "#fff" }}>
+          {name.charAt(0).toUpperCase()}
+        </Text>
+      </View>
+    </Link>
   );
 }
