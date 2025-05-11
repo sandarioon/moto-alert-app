@@ -110,8 +110,8 @@ export default function AccidentScreen() {
         <FontAwesome
           onPress={handleCopyCoordinates}
           name="copy"
-          style={{ marginLeft: 10 }}
-          size={44}
+          style={{ marginTop: 10, marginLeft: 5 }}
+          size={26}
           color={"#25a9e2"}
         />
       </View>

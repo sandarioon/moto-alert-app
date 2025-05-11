@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   chatIdContainer: {
-    marginTop: 50,
+    marginTop: 75,
     flexDirection: "row",
     backgroundColor: "#fff",
     justifyContent: "space-between",
