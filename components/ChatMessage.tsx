@@ -27,7 +27,7 @@ export default function ChatMessageItem({
       }
     >
       {isMyMessage ? (
-        <View style={{ flexDirection: "row" }}>
+        <View style={{ flexDirection: "row", justifyContent: "flex-end" }}>
           <Text
             style={
               message.userId === user.id
@@ -44,7 +44,7 @@ export default function ChatMessageItem({
           />
         </View>
       ) : (
-        <View style={{ flexDirection: "row" }}>
+        <View style={{ flexDirection: "row", justifyContent: "flex-start" }}>
           <ChatMessageAvatar
             name={message.name}
             userId={message.userId}
@@ -85,12 +85,15 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     marginRight: 5,
     backgroundColor: "#25a9e2",
+    maxWidth: "82%",
   },
   bubbleTextOtherUser: {
     color: "#fff",
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 16,
+    marginLeft: 5,
     backgroundColor: "#25a111",
+    maxWidth: "82%",
   },
 });
